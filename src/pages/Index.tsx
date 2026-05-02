@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { FundRow } from "@/components/funds/FundRow";
 import { FilterBar, type FilterState } from "@/components/funds/FilterBar";
@@ -35,6 +37,14 @@ const Index = () => {
             A curated set of venture, private equity, real estate, and private
             debt funds. Select up to three to see them side by side.
           </p>
+          <Link
+            to="/recommend"
+            className="machined-edge mt-4 inline-flex w-fit items-center gap-3 rounded-md border border-border bg-surface px-4 py-2.5 text-xs font-medium text-foreground transition-colors hover:border-foreground"
+          >
+            <Sparkles className="size-3.5" />
+            Not sure where to start? Get matched in 30 seconds
+            <ArrowRight className="size-3.5 text-muted-foreground" />
+          </Link>
         </header>
 
         <FilterBar value={filters} onChange={setFilters} resultCount={filtered.length} />

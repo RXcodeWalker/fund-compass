@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Sparkles, ArrowRight, Plus, Check } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
+import { SaveToPortfolio } from "@/components/funds/SaveToPortfolio";
 import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
 import { formatCurrency } from "@/data/funds";
 import {
@@ -356,6 +357,7 @@ function RecommendationCard({
         </div>
 
         <div className="flex items-center gap-2">
+          <SaveToPortfolio fund={fund} variant="compact" />
           <button
             type="button"
             onClick={() => toggle(fund.id)}

@@ -50,7 +50,7 @@ const Index = () => {
         <FilterBar value={filters} onChange={setFilters} resultCount={filtered.length} />
 
         <div className="grid gap-1.5">
-          <div className="grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_120px] gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+          <div className="grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_200px] gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
             <div>Pick</div>
             <div>Fund</div>
             <div>Type</div>

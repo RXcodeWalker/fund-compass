@@ -12,6 +12,7 @@ import {
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { CompareBar } from "@/components/funds/CompareBar";
 import { RiskMeter } from "@/components/funds/RiskMeter";
+import { SaveToPortfolio } from "@/components/funds/SaveToPortfolio";
 import { funds, formatCurrency } from "@/data/funds";
 import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
 
@@ -71,22 +72,25 @@ const FundDetail = () => {
               {fund.ticker} · Managed by {fund.manager}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => toggle(fund.id)}
-            disabled={disabled}
-            title={disabled ? `Maximum ${MAX_COMPARE} funds` : ""}
-            className={[
-              "machined-edge inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-medium transition-all",
-              checked
-                ? "bg-primary text-primary-foreground"
-                : "border border-border bg-surface text-foreground hover:border-foreground",
-              disabled ? "cursor-not-allowed opacity-40" : "",
-            ].join(" ")}
-          >
-            {checked ? <Check className="size-3.5" strokeWidth={3} /> : <Plus className="size-3.5" />}
-            {checked ? "Added to comparison" : "Add to comparison"}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <SaveToPortfolio fund={fund} />
+            <button
+              type="button"
+              onClick={() => toggle(fund.id)}
+              disabled={disabled}
+              title={disabled ? `Maximum ${MAX_COMPARE} funds` : ""}
+              className={[
+                "machined-edge inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-medium transition-all",
+                checked
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border bg-surface text-foreground hover:border-foreground",
+                disabled ? "cursor-not-allowed opacity-40" : "",
+              ].join(" ")}
+            >
+              {checked ? <Check className="size-3.5" strokeWidth={3} /> : <Plus className="size-3.5" />}
+              {checked ? "Added to comparison" : "Add to comparison"}
+            </button>
+          </div>
         </header>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1.4fr_1fr]">

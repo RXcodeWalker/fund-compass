@@ -3,6 +3,7 @@ import { Check } from "lucide-react";
 import type { Fund } from "@/data/funds";
 import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
 import { RiskMeter } from "./RiskMeter";
+import { SaveToPortfolio } from "./SaveToPortfolio";
 
 interface Props {
   fund: Fund;
@@ -14,7 +15,7 @@ export function FundRow({ fund }: Props) {
   const disabled = !checked && isFull;
 
   return (
-    <div className="machined-edge group grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_120px] items-center gap-4 rounded-md border border-border bg-surface px-4 py-4 transition-all hover:border-border-strong hover:shadow-sm">
+    <div className="machined-edge group grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_200px] items-center gap-4 rounded-md border border-border bg-surface px-4 py-4 transition-all hover:border-border-strong hover:shadow-sm">
       <button
         type="button"
         onClick={() => toggle(fund.id)}
@@ -50,7 +51,8 @@ export function FundRow({ fund }: Props) {
         {fund.returnMin}–{fund.returnMax}%
       </span>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <SaveToPortfolio fund={fund} variant="compact" />
         <Link
           to={`/fund/${fund.id}`}
           className="rounded-md border border-border px-3 py-1.5 text-[11px] font-medium text-foreground transition-colors hover:bg-surface-muted"

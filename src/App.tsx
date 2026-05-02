@@ -8,7 +8,9 @@ import NotFound from "./pages/NotFound.tsx";
 import FundDetail from "./pages/FundDetail.tsx";
 import Compare from "./pages/Compare.tsx";
 import Recommend from "./pages/Recommend.tsx";
+import Portfolio from "./pages/Portfolio.tsx";
 import { CompareProvider } from "@/hooks/useCompare";
+import { PortfolioProvider } from "@/hooks/usePortfolio";
 
 const queryClient = new QueryClient();
 
@@ -18,16 +20,19 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <CompareProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/fund/:id" element={<FundDetail />} />
-            <Route path="/compare" element={<Compare />} />
-            <Route path="/recommend" element={<Recommend />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </CompareProvider>
+        <PortfolioProvider>
+          <CompareProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/fund/:id" element={<FundDetail />} />
+              <Route path="/compare" element={<Compare />} />
+              <Route path="/recommend" element={<Recommend />} />
+              <Route path="/portfolio" element={<Portfolio />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </CompareProvider>
+        </PortfolioProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

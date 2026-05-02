@@ -1,14 +1,17 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useCompare } from "@/hooks/useCompare";
+import { usePortfolio } from "@/hooks/usePortfolio";
 
 const nav = [
   { to: "/", label: "Funds" },
   { to: "/recommend", label: "Recommend" },
   { to: "/compare", label: "Compare" },
+  { to: "/portfolio", label: "Portfolio" },
 ];
 
 export function SiteHeader() {
   const { selected } = useCompare();
+  const { holdings } = usePortfolio();
   const location = useLocation();
 
   return (
@@ -39,6 +42,11 @@ export function SiteHeader() {
                   {item.label === "Compare" && selected.length > 0 && (
                     <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-[10px] text-primary-foreground">
                       {selected.length}
+                    </span>
+                  )}
+                  {item.label === "Portfolio" && holdings.length > 0 && (
+                    <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 font-mono text-[10px] text-primary-foreground">
+                      {holdings.length}
                     </span>
                   )}
                 </NavLink>

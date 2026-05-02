@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import FundDetail from "./pages/FundDetail.tsx";
 import Compare from "./pages/Compare.tsx";
+import Recommend from "./pages/Recommend.tsx";
 import { CompareProvider } from "@/hooks/useCompare";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/fund/:id" element={<FundDetail />} />
             <Route path="/compare" element={<Compare />} />
+            <Route path="/recommend" element={<Recommend />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

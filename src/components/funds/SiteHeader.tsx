@@ -3,6 +3,7 @@ import { useCompare } from "@/hooks/useCompare";
 
 const nav = [
   { to: "/", label: "Funds" },
+  { to: "/recommend", label: "Recommend" },
   { to: "/compare", label: "Compare" },
 ];
 

@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, X } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
+import { ComparisonInsights as ComparisonInsightsBar } from "@/components/funds/ComparisonInsights";
 import { funds, formatCurrency, type Fund } from "@/data/funds";
 import { useCompare } from "@/hooks/useCompare";
+import { generateComparisonInsights } from "@/lib/insights";
 
 type Row = {
   label: string;
@@ -127,6 +129,8 @@ function ComparisonTable({
   items: Fund[];
   onRemove: (id: string) => void;
 }) {
+  const compInsights = generateComparisonInsights(items);
+
   // Determine best value indices per row for highlighting
   const bestIdxByRow: Record<string, number | null> = {};
   rows.forEach((row) => {
@@ -153,6 +157,13 @@ function ComparisonTable({
 
   return (
     <div className="mt-10 overflow-x-auto">
+      {/* Comparison Insights */}
+      {compInsights.length > 0 && (
+        <div className="mb-6">
+          <ComparisonInsightsBar insights={compInsights} />
+        </div>
+      )}
+
       <div className="min-w-[640px]">
         {/* Header */}
         <div

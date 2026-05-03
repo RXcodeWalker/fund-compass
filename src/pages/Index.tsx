@@ -5,8 +5,12 @@ import { SiteHeader } from "@/components/funds/SiteHeader";
 import { FundRow } from "@/components/funds/FundRow";
 import { FilterBar, type FilterState } from "@/components/funds/FilterBar";
 import { CompareBar } from "@/components/funds/CompareBar";
+import { ActivityFeed } from "@/components/funds/ActivityFeed";
+import { LiveIndicator } from "@/components/funds/LiveIndicator";
+import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { funds } from "@/data/funds";
 import { computeTrustScore, getManagerForFund } from "@/data/managers";
+import { generateFundAlerts } from "@/lib/insights";
 
 const Index = () => {
   const [filters, setFilters] = useState<FilterState>({
@@ -30,13 +34,30 @@ const Index = () => {
     });
   }, [filters]);
 
+  // Collect notable alerts across visible funds
+  const notableAlerts = useMemo(() => {
+    const alerts: { id: string; tone: "info" | "warn" | "success"; message: string; detail: string }[] = [];
+    for (const fund of filtered) {
+      const fundAlerts = generateFundAlerts(fund);
+      for (const a of fundAlerts) {
+        if (a.tone === "warn" || a.tone === "success") {
+          alerts.push({ ...a, message: `${fund.name}: ${a.message}` });
+        }
+      }
+    }
+    return alerts.slice(0, 4);
+  }, [filters]);
+
   return (
     <div className="min-h-dvh bg-background">
       <SiteHeader />
 
       <main className="mx-auto max-w-[1440px] px-6 pb-32 pt-10">
         <header className="mb-10 flex flex-col gap-3">
-          <span className="label-eyebrow">Fund Registry</span>
+          <div className="flex items-center gap-3">
+            <span className="label-eyebrow">Fund Registry</span>
+            <LiveIndicator label="Live" />
+          </div>
           <h1 className="max-w-3xl text-balance text-4xl font-medium leading-[1.1] tracking-tight text-foreground">
             Compare private investment funds with clarity.
           </h1>
@@ -54,28 +75,46 @@ const Index = () => {
           </Link>
         </header>
 
-        <FilterBar value={filters} onChange={setFilters} resultCount={filtered.length} />
+        <div className="grid gap-10 xl:grid-cols-[1fr_380px]">
+          <div>
+            {/* Notable fund alerts */}
+            {notableAlerts.length > 0 && (
+              <div className="mb-4">
+                <SmartAlerts alerts={notableAlerts} compact />
+              </div>
+            )}
 
-        <div className="grid gap-1.5">
-          <div className="grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_140px_200px] gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-            <div>Pick</div>
-            <div>Fund</div>
-            <div>Type</div>
-            <div>Risk</div>
-            <div>Expected Return</div>
-            <div>Trust</div>
-            <div className="text-right">Actions</div>
+            <FilterBar value={filters} onChange={setFilters} resultCount={filtered.length} />
+
+            <div className="grid gap-1.5">
+              <div className="grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_100px_140px_200px] gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                <div>Pick</div>
+                <div>Fund</div>
+                <div>Type</div>
+                <div>Risk</div>
+                <div>Expected Return</div>
+                <div>Today</div>
+                <div>Trust</div>
+                <div className="text-right">Actions</div>
+              </div>
+
+              {filtered.length === 0 ? (
+                <div className="rounded-md border border-dashed border-border bg-surface px-6 py-16 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No funds match your filters. Try widening your criteria.
+                  </p>
+                </div>
+              ) : (
+                filtered.map((fund) => <FundRow key={fund.id} fund={fund} />)
+              )}
+            </div>
           </div>
 
-          {filtered.length === 0 ? (
-            <div className="rounded-md border border-dashed border-border bg-surface px-6 py-16 text-center">
-              <p className="text-sm text-muted-foreground">
-                No funds match your filters. Try widening your criteria.
-              </p>
+          <aside className="xl:sticky xl:top-20 xl:h-fit">
+            <div className="machined-edge rounded-lg border border-border bg-surface p-5">
+              <ActivityFeed limit={8} />
             </div>
-          ) : (
-            filtered.map((fund) => <FundRow key={fund.id} fund={fund} />)
-          )}
+          </aside>
         </div>
       </main>
 

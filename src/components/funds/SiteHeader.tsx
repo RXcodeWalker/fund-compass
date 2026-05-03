@@ -56,8 +56,11 @@ export function SiteHeader() {
         </div>
         <div className="flex items-center gap-4">
           <div className="hidden items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 font-mono text-[11px] sm:flex">
-            <span className="size-1.5 rounded-full bg-risk-low" aria-hidden />
-            Live data · 14 funds
+            <span className="relative flex size-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-risk-low opacity-50" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-risk-low" />
+            </span>
+            Live · 14 funds
           </div>
         </div>
       </div>

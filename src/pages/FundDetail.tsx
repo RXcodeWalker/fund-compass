@@ -1,9 +1,12 @@
+import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Check, Plus } from "lucide-react";
+import { ArrowLeft, Check, Plus, TrendingUp, TrendingDown } from "lucide-react";
 import {
   Area,
   AreaChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -15,6 +18,9 @@ import { RiskMeter } from "@/components/funds/RiskMeter";
 import { SaveToPortfolio } from "@/components/funds/SaveToPortfolio";
 import { TrustBadge } from "@/components/funds/TrustBadge";
 import { RiskFlagsList } from "@/components/funds/RiskFlagsList";
+import { FundTimeline } from "@/components/funds/FundTimeline";
+import { LastUpdated } from "@/components/funds/LastUpdated";
+import { LiveIndicator } from "@/components/funds/LiveIndicator";
 import { funds, formatCurrency } from "@/data/funds";
 import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
 import {
@@ -22,6 +28,19 @@ import {
   getManagerForFund,
   riskFlags,
 } from "@/data/managers";
+import { generateTimeline } from "@/data/timelines";
+import { FundInsights } from "@/components/funds/FundInsights";
+import { SmartAlerts } from "@/components/funds/SmartAlert";
+import { generateFundInsights, generateFundAlerts } from "@/lib/insights";
+import {
+  dailyChange,
+  weeklyChange,
+  currentNav,
+  lastUpdatedForFund,
+  recentPerformance,
+  fmtChange,
+  changeColor,
+} from "@/lib/simulation";
 
 const FundDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -48,12 +67,23 @@ const FundDetail = () => {
   const trust = manager ? computeTrustScore(manager) : 0;
   const flags = manager ? riskFlags(manager, fund) : [];
 
+  const todayChange = dailyChange(fund);
+  const weekChange = weeklyChange(fund);
+  const nav = currentNav(fund);
+  const lastUpdated = lastUpdatedForFund(fund);
+  const recentPerf = useMemo(() => recentPerformance(fund), [fund]);
+  const timeline = useMemo(() => generateTimeline(fund), [fund]);
+  const fundInsights = useMemo(() => generateFundInsights(fund), [fund]);
+  const fundAlerts = useMemo(() => generateFundAlerts(fund), [fund]);
+
   const metrics = [
+    { label: "Current NAV", value: nav.toFixed(2), live: true },
+    { label: "Today", value: fmtChange(todayChange), live: true, change: todayChange },
+    { label: "This Week", value: fmtChange(weekChange), live: true, change: weekChange },
     { label: "Expected Return", value: `${fund.returnMin}–${fund.returnMax}%` },
-    { label: "Risk Level", value: fund.risk },
+    { label: "Risk Level", value: fund.risk, isRisk: true },
     { label: "Duration", value: `${fund.durationYears} years` },
     { label: "Min. Investment", value: formatCurrency(fund.minInvestment) },
-    { label: "Strategy", value: fund.type },
     { label: "AUM", value: fund.aum },
     { label: "Inception", value: fund.inception },
     { label: "Manager", value: fund.manager },
@@ -74,7 +104,10 @@ const FundDetail = () => {
 
         <header className="mt-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-8">
           <div className="flex flex-col gap-3">
-            <span className="label-eyebrow">{fund.type}</span>
+            <div className="flex items-center gap-3">
+              <span className="label-eyebrow">{fund.type}</span>
+              <LiveIndicator label="Live" />
+            </div>
             <h1 className="text-4xl font-medium tracking-tight text-foreground">
               {fund.name}
             </h1>
@@ -92,6 +125,8 @@ const FundDetail = () => {
                 <span>Managed by {fund.manager}</span>
               )}
               {manager && <TrustBadge score={trust} />}
+              <span>·</span>
+              <LastUpdated date={lastUpdated} />
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -122,6 +157,63 @@ const FundDetail = () => {
               {fund.description}
             </p>
 
+            {/* Recent 30-day performance */}
+            <div className="mt-10">
+              <div className="mb-4 flex items-baseline justify-between">
+                <h2 className="label-eyebrow">Recent Performance (30 days)</h2>
+                <div className="flex items-center gap-3">
+                  <span className={`inline-flex items-center gap-1 font-mono text-xs font-medium ${changeColor(todayChange)}`}>
+                    {todayChange > 0 ? <TrendingUp className="size-3" /> : todayChange < 0 ? <TrendingDown className="size-3" /> : null}
+                    {fmtChange(todayChange)} today
+                  </span>
+                </div>
+              </div>
+              <div className="machined-edge rounded-lg border border-border bg-surface p-4">
+                <div className="h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={recentPerf} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="2 4" vertical={false} />
+                      <XAxis
+                        dataKey="day"
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => v.slice(5)}
+                      />
+                      <YAxis
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={11}
+                        tickLine={false}
+                        axisLine={false}
+                        width={40}
+                        domain={["dataMin - 2", "dataMax + 2"]}
+                      />
+                      <Tooltip
+                        cursor={{ stroke: "hsl(var(--border-strong))", strokeDasharray: "3 3" }}
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--surface))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        labelStyle={{ color: "hsl(var(--muted-foreground))" }}
+                        formatter={(value: number) => [value.toFixed(1), "NAV"]}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke={todayChange >= 0 ? "hsl(var(--risk-low))" : "hsl(var(--risk-high))"}
+                        strokeWidth={1.5}
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Historical NAV chart */}
             <div className="mt-10">
               <div className="mb-4 flex items-baseline justify-between">
                 <h2 className="label-eyebrow">Net Asset Value (indexed)</h2>
@@ -179,6 +271,13 @@ const FundDetail = () => {
           </section>
 
           <aside>
+            {/* Smart Alerts */}
+            {fundAlerts.length > 0 && (
+              <div className="mb-6">
+                <SmartAlerts alerts={fundAlerts} />
+              </div>
+            )}
+
             <h2 className="label-eyebrow mb-3">Key Metrics</h2>
             <div className="machined-edge overflow-hidden rounded-lg border border-border bg-surface">
               {metrics.map((m, i) => (
@@ -189,17 +288,43 @@ const FundDetail = () => {
                     i !== metrics.length - 1 ? "border-b border-border" : "",
                   ].join(" ")}
                 >
-                  <span className="text-xs text-muted-foreground">{m.label}</span>
-                  {m.label === "Risk Level" ? (
+                  <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                    {m.label}
+                    {m.live && (
+                      <span className="size-1.5 rounded-full bg-risk-low animate-pulse" />
+                    )}
+                  </span>
+                  {m.isRisk ? (
                     <RiskMeter risk={fund.risk} score={fund.riskScore} />
                   ) : (
-                    <span className="font-mono text-sm text-foreground">{m.value}</span>
+                    <span className={`font-mono text-sm ${m.change !== undefined ? changeColor(m.change) : "text-foreground"}`}>
+                      {m.value}
+                    </span>
                   )}
                 </div>
               ))}
             </div>
           </aside>
         </div>
+
+        {/* Key Insights */}
+        <section className="mt-14 border-t border-border pt-10">
+          <h2 className="label-eyebrow mb-4">Key Insights</h2>
+          <FundInsights insights={fundInsights} />
+        </section>
+
+        {/* Fund Update Timeline */}
+        <section className="mt-14 border-t border-border pt-10">
+          <div className="mb-6 flex items-baseline justify-between">
+            <h2 className="label-eyebrow">Fund Update Timeline</h2>
+            <span className="font-mono text-[11px] text-muted-foreground">
+              {timeline.length} events since inception
+            </span>
+          </div>
+          <div className="machined-edge rounded-lg border border-border bg-surface p-6">
+            <FundTimeline entries={timeline} initialShow={10} />
+          </div>
+        </section>
 
         {manager && (
           <section className="mt-14 grid gap-10 border-t border-border pt-10 lg:grid-cols-[1.4fr_1fr]">

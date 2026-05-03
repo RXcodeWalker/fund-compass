@@ -14,8 +14,13 @@ import {
 import { ArrowRight, Briefcase, Sparkles, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { CompareBar } from "@/components/funds/CompareBar";
+import { LiveIndicator } from "@/components/funds/LiveIndicator";
+import { LastUpdated } from "@/components/funds/LastUpdated";
+import { PortfolioAnalysisSection } from "@/components/funds/PortfolioAnalysis";
+import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { funds } from "@/data/funds";
 import { usePortfolio, type Holding } from "@/hooks/usePortfolio";
+import { usePortfolioLiveData } from "@/hooks/useSimulation";
 import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
 import {
   fmtPct,
@@ -23,6 +28,14 @@ import {
   simulateHolding,
   summarizePortfolio,
 } from "@/lib/portfolio";
+import { analyzePortfolio, generatePortfolioAlerts } from "@/lib/insights";
+import {
+  dailyChange,
+  weeklyChange,
+  lastUpdatedForFund,
+  fmtChange,
+  changeColor,
+} from "@/lib/simulation";
 import { toast } from "sonner";
 
 const Portfolio = () => {
@@ -44,15 +57,27 @@ const Portfolio = () => {
   const summary = useMemo(() => summarizePortfolio(funds, holdings), [holdings]);
   const positive = summary.totalGain >= 0;
 
+  const fundIds = useMemo(() => holdings.map((h) => h.fundId), [holdings]);
+  const liveData = usePortfolioLiveData(
+    summary.totalInvested,
+    summary.totalCurrent,
+    fundIds
+  );
+  const portfolioAnalysis = useMemo(() => analyzePortfolio(holdings), [holdings]);
+  const portfolioAlerts = useMemo(() => generatePortfolioAlerts(holdings), [holdings]);
+
   return (
     <div className="min-h-dvh bg-background">
       <SiteHeader />
 
       <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-10">
         <header className="mb-10 flex flex-col gap-3">
-          <span className="label-eyebrow inline-flex items-center gap-2">
-            <Briefcase className="size-3" /> Portfolio
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="label-eyebrow inline-flex items-center gap-2">
+              <Briefcase className="size-3" /> Portfolio
+            </span>
+            {enriched.length > 0 && <LiveIndicator label="Live" />}
+          </div>
           <h1 className="max-w-3xl text-balance text-4xl font-medium leading-[1.1] tracking-tight text-foreground">
             Your private investment portfolio.
           </h1>
@@ -64,12 +89,22 @@ const Portfolio = () => {
 
         {enriched.length === 0 ? <EmptyState /> : (
           <>
+            {/* Portfolio Alerts */}
+            {portfolioAlerts.length > 0 && (
+              <div className="mb-6">
+                <SmartAlerts alerts={portfolioAlerts} compact />
+              </div>
+            )}
+
             <SummaryStrip
               invested={summary.totalInvested}
               current={summary.totalCurrent}
               gain={summary.totalGain}
               returnPct={summary.returnPct}
               count={enriched.length}
+              dailyChange={liveData.dailyChangePct}
+              weeklyChange={liveData.weeklyChangePct}
+              lastUpdated={liveData.lastUpdated}
             />
 
             {summary.series.length > 1 && (
@@ -141,6 +176,12 @@ const Portfolio = () => {
                 ))}
               </div>
             </section>
+
+            {/* Portfolio Analysis */}
+            <section className="mt-10 border-t border-border pt-10">
+              <h2 className="label-eyebrow mb-6">Portfolio Analysis</h2>
+              <PortfolioAnalysisSection analysis={portfolioAnalysis} />
+            </section>
           </>
         )}
       </main>
@@ -156,16 +197,22 @@ function SummaryStrip({
   gain,
   returnPct,
   count,
+  dailyChange: dailyChg,
+  weeklyChange: weeklyChg,
+  lastUpdated,
 }: {
   invested: number;
   current: number;
   gain: number;
   returnPct: number;
   count: number;
+  dailyChange: number;
+  weeklyChange: number;
+  lastUpdated: Date;
 }) {
   const positive = gain >= 0;
   return (
-    <section className="machined-edge grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-4">
+    <section className="machined-edge grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-6">
       <Stat label="Total invested" value={fmtUSD(invested)} mono />
       <Stat label="Current value" value={fmtUSD(current)} mono accent />
       <Stat
@@ -181,6 +228,20 @@ function SummaryStrip({
         tone={positive ? "positive" : "negative"}
         sub={`${count} holding${count === 1 ? "" : "s"}`}
       />
+      <Stat
+        label="Today"
+        value={fmtChange(dailyChg)}
+        mono
+        tone={dailyChg >= 0 ? "positive" : "negative"}
+        sub="simulated"
+      />
+      <Stat
+        label="This week"
+        value={fmtChange(weeklyChg)}
+        mono
+        tone={weeklyChg >= 0 ? "positive" : "negative"}
+        footer={<LastUpdated date={lastUpdated} />}
+      />
     </section>
   );
 }
@@ -192,6 +253,7 @@ function Stat({
   mono,
   accent,
   tone,
+  footer,
 }: {
   label: string;
   value: string;
@@ -199,6 +261,7 @@ function Stat({
   mono?: boolean;
   accent?: boolean;
   tone?: "positive" | "negative";
+  footer?: React.ReactNode;
 }) {
   const toneClass =
     tone === "positive" ? "text-risk-low" : tone === "negative" ? "text-risk-high" : "text-foreground";
@@ -212,6 +275,7 @@ function Stat({
         {tone && (tone === "positive" ? <TrendingUp className="size-3.5 text-risk-low" /> : <TrendingDown className="size-3.5 text-risk-high" />)}
       </div>
       {sub && <span className={`font-mono text-[11px] ${accent ? "text-background/60" : "text-muted-foreground"}`}>{sub}</span>}
+      {footer}
     </div>
   );
 }
@@ -232,6 +296,10 @@ function HoldingCard({
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
 
+  const todayChg = dailyChange(fund);
+  const weekChg = weeklyChange(fund);
+  const lastUpd = lastUpdatedForFund(fund);
+
   return (
     <article className="machined-edge flex flex-col rounded-lg border border-border bg-surface p-5 transition-colors hover:border-border-strong">
       <div className="flex items-start justify-between gap-3">
@@ -240,9 +308,12 @@ function HoldingCard({
           <h3 className="mt-1 text-base font-semibold tracking-tight text-foreground group-hover:underline">
             {fund.name}
           </h3>
-          <span className="font-mono text-[11px] text-muted-foreground">
-            {fund.ticker} · since {holding.startDate}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[11px] text-muted-foreground">
+              {fund.ticker} · since {holding.startDate}
+            </span>
+            <LastUpdated date={lastUpd} />
+          </div>
         </Link>
         <button
           type="button"
@@ -262,6 +333,24 @@ function HoldingCard({
           value={fmtPct(sim.returnPct)}
           tone={positive ? "positive" : "negative"}
         />
+      </div>
+
+      {/* Live change indicators */}
+      <div className="mt-3 flex items-center gap-4">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Today</span>
+          <span className={`font-mono text-xs font-medium ${changeColor(todayChg)}`}>
+            {fmtChange(todayChg)}
+          </span>
+          {todayChg > 0 ? <TrendingUp className="size-3 text-risk-low" /> : todayChg < 0 ? <TrendingDown className="size-3 text-risk-high" /> : null}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Week</span>
+          <span className={`font-mono text-xs font-medium ${changeColor(weekChg)}`}>
+            {fmtChange(weekChg)}
+          </span>
+          {weekChg > 0 ? <TrendingUp className="size-3 text-risk-low" /> : weekChg < 0 ? <TrendingDown className="size-3 text-risk-high" /> : null}
+        </div>
       </div>
 
       <div className="mt-4 h-24 w-full">

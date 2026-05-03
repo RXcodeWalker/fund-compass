@@ -68,11 +68,11 @@ const Compare = () => {
 
       <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-10">
         <Link
-          to="/"
+          to="/funds"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />
-          Back to fund registry
+          Back to funds
         </Link>
 
         <header className="mt-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-8">
@@ -123,7 +123,7 @@ function EmptyState() {
         here for a side-by-side breakdown.
       </p>
       <Link
-        to="/"
+        to="/funds"
         className="mt-6 inline-block rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
       >
         Browse funds

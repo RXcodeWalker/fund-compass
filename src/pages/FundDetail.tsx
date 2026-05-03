@@ -57,8 +57,8 @@ const FundDetail = () => {
         <SiteHeader />
         <main className="mx-auto max-w-2xl px-6 py-24 text-center">
           <h1 className="text-xl font-medium">Fund not found</h1>
-          <Link to="/" className="mt-4 inline-block text-sm underline">
-            Back to fund registry
+          <Link to="/funds" className="mt-4 inline-block text-sm underline">
+            Back to funds
           </Link>
         </main>
       </div>
@@ -99,11 +99,11 @@ const FundDetail = () => {
 
       <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-10">
         <Link
-          to="/"
+          to="/funds"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />
-          Back to all funds
+          Back to fund list
         </Link>
 
         <header className="mt-6 flex flex-wrap items-end justify-between gap-6 border-b border-border pb-8">

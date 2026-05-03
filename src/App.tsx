@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Landing from "./pages/Landing.tsx";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import FundDetail from "./pages/FundDetail.tsx";
@@ -28,7 +29,8 @@ const App = () => (
           <PortfolioProvider>
             <CompareProvider>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/" element={<Landing />} />
+                <Route path="/funds" element={<Index />} />
                 <Route path="/fund/:id" element={<FundDetail />} />
                 <Route path="/compare" element={<Compare />} />
                 <Route path="/recommend" element={<Recommend />} />

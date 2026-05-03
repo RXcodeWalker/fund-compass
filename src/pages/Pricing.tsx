@@ -41,11 +41,11 @@ const Pricing = () => {
 
       <main className="mx-auto max-w-[1120px] px-6 pb-32 pt-10">
         <Link
-          to="/"
+          to="/funds"
           className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" />
-          Back to fund registry
+          Back to funds
         </Link>
 
         <header className="mt-8 mb-14 text-center">

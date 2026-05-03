@@ -4,10 +4,11 @@ import { usePortfolio } from "@/hooks/usePortfolio";
 import { useSubscription } from "@/hooks/useSubscription";
 
 const nav = [
-  { to: "/", label: "Funds" },
+  { to: "/funds", label: "Funds" },
   { to: "/recommend", label: "Recommend" },
   { to: "/compare", label: "Compare" },
   { to: "/portfolio", label: "Portfolio" },
+  { to: "/pricing", label: "Pricing" },
 ];
 
 export function SiteHeader() {
@@ -29,7 +30,7 @@ export function SiteHeader() {
           <div className="hidden h-4 w-px bg-border md:block" />
           <nav className="hidden items-center gap-6 text-[13px] font-medium md:flex">
             {nav.map((item) => {
-              const active = item.to === "/" ? location.pathname === "/" : location.pathname.startsWith(item.to);
+              const active = item.to === "/funds" ? location.pathname === "/funds" || location.pathname.startsWith("/fund/") : location.pathname.startsWith(item.to);
               return (
                 <NavLink
                   key={item.to}

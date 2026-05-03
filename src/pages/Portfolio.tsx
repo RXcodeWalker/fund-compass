@@ -447,7 +447,7 @@ function EmptyState() {
       </div>
       <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
         <Link
-          to="/"
+          to="/funds"
           className="rounded-md bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
         >
           Browse funds

@@ -13,8 +13,15 @@ import { SiteHeader } from "@/components/funds/SiteHeader";
 import { CompareBar } from "@/components/funds/CompareBar";
 import { RiskMeter } from "@/components/funds/RiskMeter";
 import { SaveToPortfolio } from "@/components/funds/SaveToPortfolio";
+import { TrustBadge } from "@/components/funds/TrustBadge";
+import { RiskFlagsList } from "@/components/funds/RiskFlagsList";
 import { funds, formatCurrency } from "@/data/funds";
 import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
+import {
+  computeTrustScore,
+  getManagerForFund,
+  riskFlags,
+} from "@/data/managers";
 
 const FundDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +44,9 @@ const FundDetail = () => {
 
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
+  const manager = getManagerForFund(fund);
+  const trust = manager ? computeTrustScore(manager) : 0;
+  const flags = manager ? riskFlags(manager, fund) : [];
 
   const metrics = [
     { label: "Expected Return", value: `${fund.returnMin}–${fund.returnMax}%` },
@@ -68,9 +78,21 @@ const FundDetail = () => {
             <h1 className="text-4xl font-medium tracking-tight text-foreground">
               {fund.name}
             </h1>
-            <p className="font-mono text-xs text-muted-foreground">
-              {fund.ticker} · Managed by {fund.manager}
-            </p>
+            <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-muted-foreground">
+              <span>{fund.ticker}</span>
+              <span>·</span>
+              {manager ? (
+                <Link
+                  to={`/manager/${manager.id}`}
+                  className="underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                >
+                  Managed by {manager.firm}
+                </Link>
+              ) : (
+                <span>Managed by {fund.manager}</span>
+              )}
+              {manager && <TrustBadge score={trust} />}
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <SaveToPortfolio fund={fund} />
@@ -178,6 +200,58 @@ const FundDetail = () => {
             </div>
           </aside>
         </div>
+
+        {manager && (
+          <section className="mt-14 grid gap-10 border-t border-border pt-10 lg:grid-cols-[1.4fr_1fr]">
+            <div>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="label-eyebrow">Manager intelligence</h2>
+                <Link
+                  to={`/manager/${manager.id}`}
+                  className="text-[11px] font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+                >
+                  View full profile →
+                </Link>
+              </div>
+              <div className="machined-edge rounded-lg border border-border bg-surface p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-base font-semibold text-foreground">
+                      {manager.name}
+                    </span>
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {manager.title} · {manager.firm}
+                    </span>
+                  </div>
+                  <TrustBadge score={trust} size="md" />
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-foreground">
+                  {manager.bio}
+                </p>
+                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { l: "Experience", v: `${manager.yearsExperience}y` },
+                    { l: "AUM", v: manager.aum },
+                    { l: "Avg IRR", v: manager.avgIrr ? `${manager.avgIrr}%` : "—" },
+                    { l: "Exits", v: `${manager.successfulExits}` },
+                  ].map((s) => (
+                    <div
+                      key={s.l}
+                      className="rounded-md border border-border bg-background px-3 py-2.5"
+                    >
+                      <div className="label-eyebrow">{s.l}</div>
+                      <div className="mt-1 font-mono text-sm text-foreground">{s.v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div>
+              <h2 className="label-eyebrow mb-3">Risk signals</h2>
+              <RiskFlagsList flags={flags} />
+            </div>
+          </section>
+        )}
       </main>
 
       <CompareBar />

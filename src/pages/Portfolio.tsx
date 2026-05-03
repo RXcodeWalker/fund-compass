@@ -18,10 +18,13 @@ import { LiveIndicator } from "@/components/funds/LiveIndicator";
 import { LastUpdated } from "@/components/funds/LastUpdated";
 import { PortfolioAnalysisSection } from "@/components/funds/PortfolioAnalysis";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
+import { LockedFeature } from "@/components/funds/LockedFeature";
+import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
 import { funds } from "@/data/funds";
 import { usePortfolio, type Holding } from "@/hooks/usePortfolio";
 import { usePortfolioLiveData } from "@/hooks/useSimulation";
-import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
+import { useCompare } from "@/hooks/useCompare";
+import { useSubscription } from "@/hooks/useSubscription";
 import {
   fmtPct,
   fmtUSD,
@@ -65,6 +68,7 @@ const Portfolio = () => {
   );
   const portfolioAnalysis = useMemo(() => analyzePortfolio(holdings), [holdings]);
   const portfolioAlerts = useMemo(() => generatePortfolioAlerts(holdings), [holdings]);
+  const { canAccess, isFree } = useSubscription();
 
   return (
     <div className="min-h-dvh bg-background">
@@ -90,11 +94,15 @@ const Portfolio = () => {
         {enriched.length === 0 ? <EmptyState /> : (
           <>
             {/* Portfolio Alerts */}
-            {portfolioAlerts.length > 0 && (
+            {canAccess("smartAlerts") && portfolioAlerts.length > 0 ? (
               <div className="mb-6">
                 <SmartAlerts alerts={portfolioAlerts} compact />
               </div>
-            )}
+            ) : !canAccess("smartAlerts") ? (
+              <div className="mb-6">
+                <UpgradePrompt feature="Smart Alerts" description="Get warnings about portfolio concentration, risk changes, and diversification." compact />
+              </div>
+            ) : null}
 
             <SummaryStrip
               invested={summary.totalInvested}
@@ -180,7 +188,13 @@ const Portfolio = () => {
             {/* Portfolio Analysis */}
             <section className="mt-10 border-t border-border pt-10">
               <h2 className="label-eyebrow mb-6">Portfolio Analysis</h2>
-              <PortfolioAnalysisSection analysis={portfolioAnalysis} />
+              {canAccess("portfolioAnalysis") ? (
+                <PortfolioAnalysisSection analysis={portfolioAnalysis} />
+              ) : (
+                <LockedFeature feature="Portfolio Analytics">
+                  <PortfolioAnalysisSection analysis={portfolioAnalysis} />
+                </LockedFeature>
+              )}
             </section>
           </>
         )}

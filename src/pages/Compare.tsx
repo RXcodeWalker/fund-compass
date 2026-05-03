@@ -3,8 +3,10 @@ import { ArrowLeft, X } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
 import { ComparisonInsights as ComparisonInsightsBar } from "@/components/funds/ComparisonInsights";
+import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
 import { funds, formatCurrency, type Fund } from "@/data/funds";
 import { useCompare } from "@/hooks/useCompare";
+import { useSubscription } from "@/hooks/useSubscription";
 import { generateComparisonInsights } from "@/lib/insights";
 
 type Row = {
@@ -52,10 +54,13 @@ const rows: Row[] = [
 ];
 
 const Compare = () => {
-  const { selected, remove, clear } = useCompare();
+  const { selected, remove, clear, maxCompare } = useCompare();
+  const { isFree, canAccess } = useSubscription();
   const items = selected
     .map((id) => funds.find((f) => f.id === id))
     .filter((f): f is Fund => Boolean(f));
+
+  const showComparisonInsights = canAccess("comparisonInsights");
 
   return (
     <div className="min-h-dvh bg-background">
@@ -79,6 +84,11 @@ const Compare = () => {
             <p className="mt-2 max-w-lg text-sm text-muted-foreground">
               Differences are highlighted so you can decide quickly. Best value in
               each row is marked with a soft accent.
+              {isFree && (
+                <span className="ml-1 font-mono text-[11px] text-muted-foreground">
+                  (Free plan: up to {maxCompare} funds)
+                </span>
+              )}
             </p>
           </div>
           {items.length > 0 && (
@@ -129,7 +139,9 @@ function ComparisonTable({
   items: Fund[];
   onRemove: (id: string) => void;
 }) {
+  const { canAccess } = useSubscription();
   const compInsights = generateComparisonInsights(items);
+  const showInsights = canAccess("comparisonInsights");
 
   // Determine best value indices per row for highlighting
   const bestIdxByRow: Record<string, number | null> = {};
@@ -158,9 +170,17 @@ function ComparisonTable({
   return (
     <div className="mt-10 overflow-x-auto">
       {/* Comparison Insights */}
-      {compInsights.length > 0 && (
+      {showInsights && compInsights.length > 0 ? (
         <div className="mb-6">
           <ComparisonInsightsBar insights={compInsights} />
+        </div>
+      ) : (
+        <div className="mb-6">
+          <UpgradePrompt
+            feature="Comparison Insights"
+            description="See which fund has the highest return potential, lowest risk, and more — automatically."
+            compact
+          />
         </div>
       )}
 

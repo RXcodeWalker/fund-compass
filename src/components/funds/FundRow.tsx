@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Check, TrendingUp, TrendingDown } from "lucide-react";
 import type { Fund } from "@/data/funds";
-import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
+import { useCompare } from "@/hooks/useCompare";
+import { useSubscription } from "@/hooks/useSubscription";
 import { RiskMeter } from "./RiskMeter";
 import { SaveToPortfolio } from "./SaveToPortfolio";
 import { TrustBadge } from "./TrustBadge";
@@ -14,13 +15,15 @@ interface Props {
 }
 
 export function FundRow({ fund }: Props) {
-  const { isSelected, toggle, isFull } = useCompare();
+  const { isSelected, toggle, isFull, maxCompare } = useCompare();
+  const { canAccess } = useSubscription();
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
   const manager = getManagerForFund(fund);
   const trust = manager ? computeTrustScore(manager) : 0;
   const todayChange = dailyChange(fund);
   const lastUpdated = lastUpdatedForFund(fund);
+  const showTrust = canAccess("trustScores");
 
   return (
     <div className="machined-edge group grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_100px_140px_200px] items-center gap-4 rounded-md border border-border bg-surface px-4 py-4 transition-all hover:border-border-strong hover:shadow-sm">
@@ -74,7 +77,7 @@ export function FundRow({ fund }: Props) {
       </div>
 
       <div className="flex items-center">
-        {manager ? (
+        {showTrust && manager ? (
           <Link
             to={`/manager/${manager.id}`}
             onClick={(e) => e.stopPropagation()}
@@ -82,8 +85,12 @@ export function FundRow({ fund }: Props) {
           >
             <TrustBadge score={trust} showLabel={false} />
           </Link>
-        ) : (
+        ) : showTrust ? (
           <span className="font-mono text-[11px] text-muted-foreground">—</span>
+        ) : (
+          <Link to="/pricing" className="font-mono text-[10px] text-muted-foreground underline-offset-4 hover:underline">
+            Pro
+          </Link>
         )}
       </div>
 

@@ -4,7 +4,7 @@ import { Sparkles, ArrowRight, Plus, Check } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
 import { SaveToPortfolio } from "@/components/funds/SaveToPortfolio";
-import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
+import { useCompare } from "@/hooks/useCompare";
 import { formatCurrency } from "@/data/funds";
 import {
   recommend,
@@ -362,7 +362,7 @@ function RecommendationCard({
             type="button"
             onClick={() => toggle(fund.id)}
             disabled={disabled}
-            title={disabled ? `Maximum ${MAX_COMPARE} funds` : undefined}
+            title={disabled ? `Comparison limit reached` : undefined}
             className={[
               "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[11px] font-medium transition-colors",
               checked

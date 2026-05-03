@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Bookmark, Check } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Bookmark, Check, Lock } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePortfolio } from "@/hooks/usePortfolio";
+import { useSubscription } from "@/hooks/useSubscription";
 import { formatCurrency, type Fund } from "@/data/funds";
 
 interface Props {
@@ -22,10 +24,28 @@ const todayISO = () => new Date().toISOString().slice(0, 10);
 
 export function SaveToPortfolio({ fund, variant = "default", className }: Props) {
   const { has, add, remove } = usePortfolio();
+  const { canAccess } = useSubscription();
   const inPortfolio = has(fund.id);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState<number>(fund.minInvestment);
   const [startDate, setStartDate] = useState<string>(todayISO());
+  const canTrack = canAccess("portfolioTracking");
+
+  // If portfolio tracking is not available, show a locked button
+  if (!canTrack) {
+    return (
+      <Link
+        to="/pricing"
+        className={[
+          "inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground",
+          className ?? "",
+        ].join(" ")}
+      >
+        <Lock className="size-3" />
+        {variant === "compact" ? "Pro" : "Save to portfolio"}
+      </Link>
+    );
+  }
 
   const handleClick = () => {
     if (inPortfolio) {

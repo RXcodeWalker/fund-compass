@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useCompare } from "@/hooks/useCompare";
 import { usePortfolio } from "@/hooks/usePortfolio";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const nav = [
   { to: "/", label: "Funds" },
@@ -12,6 +13,7 @@ const nav = [
 export function SiteHeader() {
   const { selected } = useCompare();
   const { holdings } = usePortfolio();
+  const { isPro, features } = useSubscription();
   const location = useLocation();
 
   return (
@@ -54,7 +56,7 @@ export function SiteHeader() {
             })}
           </nav>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="hidden items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 font-mono text-[11px] sm:flex">
             <span className="relative flex size-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-risk-low opacity-50" />
@@ -62,6 +64,21 @@ export function SiteHeader() {
             </span>
             Live · 14 funds
           </div>
+          {isPro ? (
+            <Link
+              to="/pricing"
+              className="hidden rounded-full border border-foreground/20 bg-foreground/5 px-3 py-1 text-[11px] font-semibold text-foreground transition-colors hover:bg-foreground/10 sm:inline-flex"
+            >
+              {features.label}
+            </Link>
+          ) : (
+            <Link
+              to="/pricing"
+              className="hidden rounded-full bg-foreground px-3 py-1 text-[11px] font-semibold text-background transition-opacity hover:opacity-90 sm:inline-flex"
+            >
+              Upgrade
+            </Link>
+          )}
         </div>
       </div>
     </header>

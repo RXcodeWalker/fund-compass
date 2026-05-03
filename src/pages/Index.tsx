@@ -8,9 +8,12 @@ import { CompareBar } from "@/components/funds/CompareBar";
 import { ActivityFeed } from "@/components/funds/ActivityFeed";
 import { LiveIndicator } from "@/components/funds/LiveIndicator";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
+import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
 import { funds } from "@/data/funds";
 import { computeTrustScore, getManagerForFund } from "@/data/managers";
 import { generateFundAlerts } from "@/lib/insights";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useCompare } from "@/hooks/useCompare";
 
 const Index = () => {
   const [filters, setFilters] = useState<FilterState>({

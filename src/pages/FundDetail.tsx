@@ -21,8 +21,11 @@ import { RiskFlagsList } from "@/components/funds/RiskFlagsList";
 import { FundTimeline } from "@/components/funds/FundTimeline";
 import { LastUpdated } from "@/components/funds/LastUpdated";
 import { LiveIndicator } from "@/components/funds/LiveIndicator";
+import { LockedFeature } from "@/components/funds/LockedFeature";
+import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
 import { funds, formatCurrency } from "@/data/funds";
-import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
+import { useCompare } from "@/hooks/useCompare";
+import { useSubscription } from "@/hooks/useSubscription";
 import {
   computeTrustScore,
   getManagerForFund,
@@ -46,6 +49,7 @@ const FundDetail = () => {
   const { id } = useParams<{ id: string }>();
   const fund = funds.find((f) => f.id === id);
   const { isSelected, toggle, isFull } = useCompare();
+  const { canAccess } = useSubscription();
 
   if (!fund) {
     return (
@@ -272,11 +276,15 @@ const FundDetail = () => {
 
           <aside>
             {/* Smart Alerts */}
-            {fundAlerts.length > 0 && (
+            {canAccess("smartAlerts") && fundAlerts.length > 0 ? (
               <div className="mb-6">
                 <SmartAlerts alerts={fundAlerts} />
               </div>
-            )}
+            ) : !canAccess("smartAlerts") ? (
+              <div className="mb-6">
+                <UpgradePrompt feature="Smart Alerts" description="Get timely warnings about fund risk, volatility, and manager changes." compact />
+              </div>
+            ) : null}
 
             <h2 className="label-eyebrow mb-3">Key Metrics</h2>
             <div className="machined-edge overflow-hidden rounded-lg border border-border bg-surface">
@@ -310,7 +318,22 @@ const FundDetail = () => {
         {/* Key Insights */}
         <section className="mt-14 border-t border-border pt-10">
           <h2 className="label-eyebrow mb-4">Key Insights</h2>
-          <FundInsights insights={fundInsights} />
+          {canAccess("fullInsights") ? (
+            <FundInsights insights={fundInsights} />
+          ) : (
+            <LockedFeature feature="Full Fund Insights">
+              <div className="space-y-3">
+                {fundInsights.slice(0, 2).map((insight) => (
+                  <div key={insight.id} className="rounded-md border border-border bg-surface p-4">
+                    <span className="text-sm font-medium text-foreground">{insight.title}</span>
+                    <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
+                      {insight.detail.slice(0, 40)}...
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </LockedFeature>
+          )}
         </section>
 
         {/* Fund Update Timeline */}

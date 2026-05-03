@@ -1,4 +1,7 @@
+import { Link } from "react-router-dom";
+import { Lock } from "lucide-react";
 import { fundTypes, riskLevels, type FundType, type RiskLevel } from "@/data/funds";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export interface FilterState {
   type: "All" | FundType;
@@ -45,6 +48,10 @@ const Segmented = <T extends string>({
 );
 
 export function FilterBar({ value, onChange, resultCount }: Props) {
+  const { canAccess } = useSubscription();
+  const hasAdvancedFilters = canAccess("advancedFilters");
+  const hasTrustScores = canAccess("trustScores");
+
   return (
     <section className="mb-8 flex flex-wrap items-end gap-6 border-b border-border pb-8">
       <div className="flex flex-col gap-2">
@@ -86,25 +93,39 @@ export function FilterBar({ value, onChange, resultCount }: Props) {
         </div>
       </div>
 
+      {/* Trust Score filter — Pro only */}
       <div className="flex flex-col gap-2">
-        <label className="label-eyebrow" htmlFor="min-trust">
+        <label className="label-eyebrow inline-flex items-center gap-1.5" htmlFor="min-trust">
           Min Trust Score
+          {!hasTrustScores && (
+            <Lock className="size-3 text-muted-foreground" />
+          )}
         </label>
-        <div className="flex h-10 w-56 items-center gap-3 rounded-lg border border-border bg-surface px-3">
-          <input
-            id="min-trust"
-            type="range"
-            min={0}
-            max={100}
-            step={5}
-            value={value.minTrust}
-            onChange={(e) => onChange({ ...value, minTrust: Number(e.target.value) })}
-            className="flex-1 accent-foreground"
-          />
-          <span className="font-mono text-sm tabular-nums text-foreground">
-            {value.minTrust}
-          </span>
-        </div>
+        {hasTrustScores ? (
+          <div className="flex h-10 w-56 items-center gap-3 rounded-lg border border-border bg-surface px-3">
+            <input
+              id="min-trust"
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={value.minTrust}
+              onChange={(e) => onChange({ ...value, minTrust: Number(e.target.value) })}
+              className="flex-1 accent-foreground"
+            />
+            <span className="font-mono text-sm tabular-nums text-foreground">
+              {value.minTrust}
+            </span>
+          </div>
+        ) : (
+          <Link
+            to="/pricing"
+            className="flex h-10 w-56 items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-surface text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Lock className="size-3" />
+            Pro feature
+          </Link>
+        )}
       </div>
 
       <div className="ml-auto flex flex-col items-end gap-1">

@@ -9,6 +9,7 @@ import FundDetail from "./pages/FundDetail.tsx";
 import Compare from "./pages/Compare.tsx";
 import Recommend from "./pages/Recommend.tsx";
 import Portfolio from "./pages/Portfolio.tsx";
+import ManagerDetail from "./pages/ManagerDetail.tsx";
 import { CompareProvider } from "@/hooks/useCompare";
 import { PortfolioProvider } from "@/hooks/usePortfolio";
 
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/compare" element={<Compare />} />
               <Route path="/recommend" element={<Recommend />} />
               <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/manager/:id" element={<ManagerDetail />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

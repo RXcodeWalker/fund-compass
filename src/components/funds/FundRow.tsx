@@ -4,6 +4,8 @@ import type { Fund } from "@/data/funds";
 import { useCompare, MAX_COMPARE } from "@/hooks/useCompare";
 import { RiskMeter } from "./RiskMeter";
 import { SaveToPortfolio } from "./SaveToPortfolio";
+import { TrustBadge } from "./TrustBadge";
+import { computeTrustScore, getManagerForFund } from "@/data/managers";
 
 interface Props {
   fund: Fund;
@@ -13,9 +15,11 @@ export function FundRow({ fund }: Props) {
   const { isSelected, toggle, isFull } = useCompare();
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
+  const manager = getManagerForFund(fund);
+  const trust = manager ? computeTrustScore(manager) : 0;
 
   return (
-    <div className="machined-edge group grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_200px] items-center gap-4 rounded-md border border-border bg-surface px-4 py-4 transition-all hover:border-border-strong hover:shadow-sm">
+    <div className="machined-edge group grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_140px_200px] items-center gap-4 rounded-md border border-border bg-surface px-4 py-4 transition-all hover:border-border-strong hover:shadow-sm">
       <button
         type="button"
         onClick={() => toggle(fund.id)}
@@ -50,6 +54,20 @@ export function FundRow({ fund }: Props) {
       <span className="font-mono text-sm font-medium text-foreground">
         {fund.returnMin}–{fund.returnMax}%
       </span>
+
+      <div className="flex items-center">
+        {manager ? (
+          <Link
+            to={`/manager/${manager.id}`}
+            onClick={(e) => e.stopPropagation()}
+            title={`${manager.firm} · view manager profile`}
+          >
+            <TrustBadge score={trust} showLabel={false} />
+          </Link>
+        ) : (
+          <span className="font-mono text-[11px] text-muted-foreground">—</span>
+        )}
+      </div>
 
       <div className="flex justify-end gap-2">
         <SaveToPortfolio fund={fund} variant="compact" />

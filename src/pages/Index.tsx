@@ -6,12 +6,14 @@ import { FundRow } from "@/components/funds/FundRow";
 import { FilterBar, type FilterState } from "@/components/funds/FilterBar";
 import { CompareBar } from "@/components/funds/CompareBar";
 import { funds } from "@/data/funds";
+import { computeTrustScore, getManagerForFund } from "@/data/managers";
 
 const Index = () => {
   const [filters, setFilters] = useState<FilterState>({
     type: "All",
     risk: "All",
     minReturn: 0,
+    minTrust: 0,
   });
 
   const filtered = useMemo(() => {
@@ -19,6 +21,11 @@ const Index = () => {
       if (filters.type !== "All" && f.type !== filters.type) return false;
       if (filters.risk !== "All" && f.risk !== filters.risk) return false;
       if (f.returnMax < filters.minReturn) return false;
+      if (filters.minTrust > 0) {
+        const m = getManagerForFund(f);
+        const t = m ? computeTrustScore(m) : 0;
+        if (t < filters.minTrust) return false;
+      }
       return true;
     });
   }, [filters]);
@@ -50,12 +57,13 @@ const Index = () => {
         <FilterBar value={filters} onChange={setFilters} resultCount={filtered.length} />
 
         <div className="grid gap-1.5">
-          <div className="grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_200px] gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
+          <div className="grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_140px_200px] gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
             <div>Pick</div>
             <div>Fund</div>
             <div>Type</div>
             <div>Risk</div>
             <div>Expected Return</div>
+            <div>Trust</div>
             <div className="text-right">Actions</div>
           </div>
 

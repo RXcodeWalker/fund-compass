@@ -4,6 +4,7 @@ export interface FilterState {
   type: "All" | FundType;
   risk: "All" | RiskLevel;
   minReturn: number;
+  minTrust: number;
 }
 
 interface Props {
@@ -81,6 +82,27 @@ export function FilterBar({ value, onChange, resultCount }: Props) {
           />
           <span className="font-mono text-sm tabular-nums text-foreground">
             {value.minReturn}%
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="label-eyebrow" htmlFor="min-trust">
+          Min Trust Score
+        </label>
+        <div className="flex h-10 w-56 items-center gap-3 rounded-lg border border-border bg-surface px-3">
+          <input
+            id="min-trust"
+            type="range"
+            min={0}
+            max={100}
+            step={5}
+            value={value.minTrust}
+            onChange={(e) => onChange({ ...value, minTrust: Number(e.target.value) })}
+            className="flex-1 accent-foreground"
+          />
+          <span className="font-mono text-sm tabular-nums text-foreground">
+            {value.minTrust}
           </span>
         </div>
       </div>

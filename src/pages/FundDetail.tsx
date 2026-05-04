@@ -69,6 +69,7 @@ const FundDetail = () => {
 
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
+  const { maxCompare } = useCompare();
   const manager = getManagerForFund(fund);
   const trust = manager ? computeTrustScore(manager) : 0;
   const flags = manager ? riskFlags(manager, fund) : [];

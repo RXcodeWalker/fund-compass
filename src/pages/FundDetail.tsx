@@ -23,6 +23,8 @@ import { LastUpdated } from "@/components/funds/LastUpdated";
 import { LiveIndicator } from "@/components/funds/LiveIndicator";
 import { LockedFeature } from "@/components/funds/LockedFeature";
 import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
+import { FavoriteButton } from "@/components/funds/FavoriteButton";
+import { ShareInsight } from "@/components/funds/ShareInsight";
 import { funds, formatCurrency } from "@/data/funds";
 import { useCompare } from "@/hooks/useCompare";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -134,6 +136,7 @@ const FundDetail = () => {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <FavoriteButton fundId={fund.id} />
             <SaveToPortfolio fund={fund} />
             <button
               type="button"
@@ -319,7 +322,7 @@ const FundDetail = () => {
         <section className="mt-14 border-t border-border pt-10">
           <h2 className="label-eyebrow mb-4">Key Insights</h2>
           {canAccess("fullInsights") ? (
-            <FundInsights insights={fundInsights} />
+            <FundInsights insights={fundInsights} source={fund.name} />
           ) : (
             <LockedFeature feature="Full Fund Insights">
               <div className="space-y-3">

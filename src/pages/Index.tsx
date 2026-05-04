@@ -9,11 +9,14 @@ import { ActivityFeed } from "@/components/funds/ActivityFeed";
 import { LiveIndicator } from "@/components/funds/LiveIndicator";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
+import { SavedComparisons } from "@/components/funds/SavedComparisons";
+import { ReturnTriggers } from "@/components/funds/ReturnTriggers";
 import { funds } from "@/data/funds";
 import { computeTrustScore, getManagerForFund } from "@/data/managers";
 import { generateFundAlerts } from "@/lib/insights";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useCompare } from "@/hooks/useCompare";
+import { useGrowth } from "@/hooks/useGrowth";
 
 const Index = () => {
   const [filters, setFilters] = useState<FilterState>({
@@ -22,6 +25,8 @@ const Index = () => {
     minReturn: 0,
     minTrust: 0,
   });
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const { favorites } = useGrowth();
 
   const filtered = useMemo(() => {
     return funds.filter((f) => {
@@ -33,6 +38,7 @@ const Index = () => {
         const t = m ? computeTrustScore(m) : 0;
         if (t < filters.minTrust) return false;
       }
+      if (showFavoritesOnly && !favorites.some((fav) => fav.fundId === f.id)) return false;
       return true;
     });
   }, [filters]);
@@ -80,6 +86,14 @@ const Index = () => {
 
         <div className="grid gap-10 xl:grid-cols-[1fr_380px]">
           <div>
+            {/* Return triggers */}
+            <div className="mb-4">
+              <ReturnTriggers />
+            </div>
+
+            {/* Saved comparisons */}
+            <SavedComparisons />
+
             {/* Notable fund alerts */}
             {notableAlerts.length > 0 && (
               <div className="mb-4">
@@ -88,6 +102,22 @@ const Index = () => {
             )}
 
             <FilterBar value={filters} onChange={setFilters} resultCount={filtered.length} />
+
+            {favorites.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowFavoritesOnly((v) => !v)}
+                className={[
+                  "mb-2 inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-[11px] font-medium transition-colors",
+                  showFavoritesOnly
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border bg-surface text-foreground hover:border-foreground",
+                ].join(" ")}
+              >
+                <span className={showFavoritesOnly ? "text-background" : "text-risk-medium"}>&#9733;</span>
+                Favorites only ({favorites.length})
+              </button>
+            )}
 
             <div className="grid gap-1.5">
               <div className="grid grid-cols-[40px_1.6fr_1fr_1.1fr_1fr_100px_140px_200px] gap-4 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">

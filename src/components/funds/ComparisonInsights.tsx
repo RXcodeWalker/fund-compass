@@ -1,5 +1,6 @@
 import { TrendingUp, ShieldCheck, DollarSign, Clock, DoorOpen, TriangleAlert as AlertTriangle } from "lucide-react";
 import type { ComparisonInsight, InsightTone } from "@/lib/insights";
+import { ShareInsight } from "./ShareInsight";
 
 const labelIcon: Record<string, React.ElementType> = {
   "Highest return potential": TrendingUp,
@@ -37,6 +38,7 @@ export function ComparisonInsights({ insights }: Props) {
             <Icon className="size-3" />
             <span className="text-[11px] font-medium">{insight.label}</span>
             <span className="text-[11px] text-muted-foreground">— {insight.fundName}</span>
+            <ShareInsight title={insight.label} detail={`${insight.fundName}: ${insight.label}`} className="ml-0.5" />
           </div>
         );
       })}

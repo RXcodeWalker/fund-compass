@@ -16,6 +16,7 @@ import UpgradeSuccess from "./pages/UpgradeSuccess.tsx";
 import { CompareProvider } from "@/hooks/useCompare";
 import { PortfolioProvider } from "@/hooks/usePortfolio";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
+import { GrowthProvider } from "@/hooks/useGrowth";
 
 const queryClient = new QueryClient();
 
@@ -28,19 +29,22 @@ const App = () => (
         <SubscriptionProvider>
           <PortfolioProvider>
             <CompareProvider>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/funds" element={<Index />} />
-                <Route path="/fund/:id" element={<FundDetail />} />
-                <Route path="/compare" element={<Compare />} />
-                <Route path="/recommend" element={<Recommend />} />
-                <Route path="/portfolio" element={<Portfolio />} />
-                <Route path="/manager/:id" element={<ManagerDetail />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/upgrade-success" element={<UpgradeSuccess />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <GrowthProvider>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/funds" element={<Index />} />
+                  <Route path="/fund/:id" element={<FundDetail />} />
+                  <Route path="/compare" element={<Compare />} />
+                  <Route path="/compare/:ids" element={<Compare />} />
+                  <Route path="/recommend" element={<Recommend />} />
+                  <Route path="/portfolio" element={<Portfolio />} />
+                  <Route path="/manager/:id" element={<ManagerDetail />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/upgrade-success" element={<UpgradeSuccess />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </GrowthProvider>
             </CompareProvider>
           </PortfolioProvider>
         </SubscriptionProvider>

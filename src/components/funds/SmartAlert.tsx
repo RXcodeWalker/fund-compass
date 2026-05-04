@@ -1,5 +1,6 @@
 import { Info, TriangleAlert as AlertTriangle, CircleCheck as CheckCircle2 } from "lucide-react";
 import type { SmartAlert } from "@/lib/insights";
+import { ShareInsight } from "./ShareInsight";
 
 const toneIcon: Record<SmartAlert["tone"], React.ElementType> = {
   info: Info,
@@ -61,7 +62,10 @@ function AlertBanner({ alert, compact }: { alert: SmartAlert; compact: boolean }
     <div className={`flex items-start gap-3 rounded-md border ${border} ${bg} px-4 py-3`}>
       <Icon className={`mt-0.5 size-4 shrink-0 ${color}`} />
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-medium text-foreground">{alert.message}</span>
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-sm font-medium text-foreground">{alert.message}</span>
+          <ShareInsight title={alert.message} detail={alert.detail} />
+        </div>
         <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
           {alert.detail}
         </p>

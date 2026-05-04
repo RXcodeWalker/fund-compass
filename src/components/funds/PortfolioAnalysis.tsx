@@ -1,5 +1,6 @@
 import { TrendingUp, TriangleAlert as AlertTriangle, Minus, TrendingDown, ChartPie as PieChart } from "lucide-react";
 import type { PortfolioAnalysis, PortfolioInsight, InsightTone } from "@/lib/insights";
+import { ShareInsight } from "./ShareInsight";
 
 const toneIcon: Record<InsightTone, React.ElementType> = {
   positive: TrendingUp,
@@ -184,7 +185,10 @@ function InsightItem({ insight }: { insight: PortfolioInsight }) {
         <Icon className="size-3" />
       </div>
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-medium text-foreground">{insight.title}</span>
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-sm font-medium text-foreground">{insight.title}</span>
+          <ShareInsight title={insight.title} detail={insight.detail} source="Portfolio Analysis" />
+        </div>
         <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
           {insight.detail}
         </p>

@@ -7,6 +7,7 @@ import { RiskMeter } from "./RiskMeter";
 import { SaveToPortfolio } from "./SaveToPortfolio";
 import { TrustBadge } from "./TrustBadge";
 import { LastUpdated } from "./LastUpdated";
+import { FavoriteButton } from "./FavoriteButton";
 import { computeTrustScore, getManagerForFund } from "@/data/managers";
 import { dailyChange, fmtChange, changeColor, lastUpdatedForFund } from "@/lib/simulation";
 
@@ -95,6 +96,7 @@ export function FundRow({ fund }: Props) {
       </div>
 
       <div className="flex justify-end gap-2">
+        <FavoriteButton fundId={fund.id} variant="compact" />
         <SaveToPortfolio fund={fund} variant="compact" />
         <Link
           to={`/fund/${fund.id}`}

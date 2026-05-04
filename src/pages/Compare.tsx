@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft, X } from "lucide-react";
+import { Fragment, useMemo } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import { ArrowLeft, X, Share2, Bookmark, BookmarkCheck } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
 import { ComparisonInsights as ComparisonInsightsBar } from "@/components/funds/ComparisonInsights";
@@ -7,7 +8,9 @@ import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
 import { funds, formatCurrency, type Fund } from "@/data/funds";
 import { useCompare } from "@/hooks/useCompare";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useGrowth } from "@/hooks/useGrowth";
 import { generateComparisonInsights } from "@/lib/insights";
+import { toast } from "sonner";
 
 type Row = {
   label: string;
@@ -56,11 +59,23 @@ const rows: Row[] = [
 const Compare = () => {
   const { selected, remove, clear, maxCompare } = useCompare();
   const { isFree, canAccess } = useSubscription();
-  const items = selected
+  const { ids } = useParams<{ ids?: string }>();
+  const [searchParams] = useSearchParams();
+  const isShared = searchParams.get("shared") === "1";
+
+  // If accessed via shared link, use the IDs from the URL
+  const sharedIds = useMemo(() => {
+    if (!ids) return [];
+    return ids.split(",").filter(Boolean);
+  }, [ids]);
+
+  const activeIds = isShared ? sharedIds : selected;
+
+  const items = activeIds
     .map((id) => funds.find((f) => f.id === id))
     .filter((f): f is Fund => Boolean(f));
 
-  const showComparisonInsights = canAccess("comparisonInsights");
+  const showComparisonInsights = canAccess("comparisonInsights") || isShared;
 
   return (
     <div className="min-h-dvh bg-background">
@@ -79,38 +94,105 @@ const Compare = () => {
           <div>
             <span className="label-eyebrow">Side-by-Side</span>
             <h1 className="mt-2 text-4xl font-medium tracking-tight text-foreground">
-              Compare funds
+              {isShared ? "Shared comparison" : "Compare funds"}
             </h1>
             <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-              Differences are highlighted so you can decide quickly. Best value in
-              each row is marked with a soft accent.
-              {isFree && (
+              {isShared
+                ? "Someone shared this comparison with you."
+                : "Differences are highlighted so you can decide quickly. Best value in each row is marked with a soft accent."}
+              {!isShared && isFree && (
                 <span className="ml-1 font-mono text-[11px] text-muted-foreground">
                   (Free plan: up to {maxCompare} funds)
                 </span>
               )}
             </p>
           </div>
-          {items.length > 0 && (
-            <button
-              type="button"
-              onClick={clear}
-              className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Clear all
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {!isShared && items.length > 1 && (
+              <ShareCompareButton items={items} />
+            )}
+            {items.length > 0 && !isShared && (
+              <button
+                type="button"
+                onClick={clear}
+                className="rounded-md border border-border px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
         </header>
 
         {items.length === 0 ? (
           <EmptyState />
         ) : (
-          <ComparisonTable items={items} onRemove={remove} />
+          <>
+            {isShared && (
+              <div className="mb-6 rounded-md border border-border bg-surface px-4 py-3 text-center text-sm text-muted-foreground">
+                Create your own comparisons and track your portfolio.{" "}
+                <Link to="/funds" className="font-semibold text-foreground underline-offset-4 hover:underline">
+                  Get started
+                </Link>
+              </div>
+            )}
+            <ComparisonTable items={items} onRemove={isShared ? () => {} : remove} isShared={isShared} showInsights={showComparisonInsights} />
+          </>
         )}
       </main>
     </div>
   );
 };
+
+function ShareCompareButton({ items }: { items: Fund[] }) {
+  const { saveComparison, savedComparisons } = useGrowth();
+  const ids = items.map((f) => f.id).join(",");
+  const shareUrl = `${window.location.origin}/compare/${ids}?shared=1`;
+  const label = items.map((f) => f.name).join(" vs ");
+
+  const isSaved = savedComparisons.some((c) => c.fundIds.join(",") === ids);
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Could not copy link");
+    }
+  };
+
+  const handleSave = () => {
+    if (isSaved) return;
+    saveComparison(items.map((f) => f.id), label);
+    toast.success("Comparison saved");
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={handleShare}
+        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-foreground"
+      >
+        <Share2 className="size-3.5" />
+        Share link
+      </button>
+      <button
+        type="button"
+        onClick={handleSave}
+        disabled={isSaved}
+        className={[
+          "inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-xs font-medium transition-colors",
+          isSaved
+            ? "border-border bg-surface text-muted-foreground cursor-default"
+            : "border-border bg-surface text-foreground hover:border-foreground",
+        ].join(" ")}
+      >
+        {isSaved ? <BookmarkCheck className="size-3.5" /> : <Bookmark className="size-3.5" />}
+        {isSaved ? "Saved" : "Save"}
+      </button>
+    </>
+  );
+}
 
 function EmptyState() {
   return (
@@ -135,15 +217,16 @@ function EmptyState() {
 function ComparisonTable({
   items,
   onRemove,
+  isShared,
+  showInsights,
 }: {
   items: Fund[];
   onRemove: (id: string) => void;
+  isShared: boolean;
+  showInsights: boolean;
 }) {
-  const { canAccess } = useSubscription();
   const compInsights = generateComparisonInsights(items);
-  const showInsights = canAccess("comparisonInsights");
 
-  // Determine best value indices per row for highlighting
   const bestIdxByRow: Record<string, number | null> = {};
   rows.forEach((row) => {
     if (!row.highlight) {
@@ -156,7 +239,6 @@ function ComparisonTable({
       return;
     }
     const target = row.highlight === "max" ? Math.max(...values) : Math.min(...values);
-    // If all equal, no highlight
     if (values.every((v) => v === target)) {
       bestIdxByRow[row.label] = null;
     } else {
@@ -174,7 +256,7 @@ function ComparisonTable({
         <div className="mb-6">
           <ComparisonInsightsBar insights={compInsights} />
         </div>
-      ) : (
+      ) : !showInsights ? (
         <div className="mb-6">
           <UpgradePrompt
             feature="Comparison Insights"
@@ -182,7 +264,7 @@ function ComparisonTable({
             compact
           />
         </div>
-      )}
+      ) : null}
 
       <div className="min-w-[640px]">
         {/* Header */}
@@ -195,14 +277,16 @@ function ComparisonTable({
           </div>
           {items.map((f) => (
             <div key={f.id} className="relative bg-surface px-5 py-5">
-              <button
-                type="button"
-                onClick={() => onRemove(f.id)}
-                aria-label={`Remove ${f.name}`}
-                className="absolute right-3 top-3 rounded p-1 text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
-              >
-                <X className="size-3.5" />
-              </button>
+              {!isShared && (
+                <button
+                  type="button"
+                  onClick={() => onRemove(f.id)}
+                  aria-label={`Remove ${f.name}`}
+                  className="absolute right-3 top-3 rounded p-1 text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              )}
               <Link to={`/fund/${f.id}`} className="block pr-6">
                 <span className="font-mono text-[11px] text-muted-foreground">
                   {f.ticker}
@@ -223,10 +307,11 @@ function ComparisonTable({
           {rows.map((row) => {
             const bestIdx = bestIdxByRow[row.label];
             return (
-              <FragmentRow
-                key={row.label}
-                label={row.label}
-                cells={items.map((f, idx) => {
+              <Fragment key={row.label}>
+                <div className="flex items-center bg-surface-muted px-4 py-4">
+                  <span className="label-eyebrow">{row.label}</span>
+                </div>
+                {items.map((f, idx) => {
                   const isBest = bestIdx === idx;
                   return (
                     <div
@@ -251,29 +336,12 @@ function ComparisonTable({
                     </div>
                   );
                 })}
-              />
+              </Fragment>
             );
           })}
         </div>
       </div>
     </div>
-  );
-}
-
-function FragmentRow({
-  label,
-  cells,
-}: {
-  label: string;
-  cells: React.ReactNode[];
-}) {
-  return (
-    <>
-      <div className="flex items-center bg-surface-muted px-4 py-4">
-        <span className="label-eyebrow">{label}</span>
-      </div>
-      {cells}
-    </>
   );
 }
 

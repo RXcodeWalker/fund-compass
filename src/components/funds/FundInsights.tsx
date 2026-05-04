@@ -1,5 +1,6 @@
 import { TrendingUp, TrendingDown, TriangleAlert as AlertTriangle, Minus } from "lucide-react";
 import type { FundInsight, InsightTone } from "@/lib/insights";
+import { ShareInsight } from "./ShareInsight";
 
 const toneIcon: Record<InsightTone, React.ElementType> = {
   positive: TrendingUp,
@@ -31,19 +32,20 @@ const toneBg: Record<InsightTone, string> = {
 
 interface Props {
   insights: FundInsight[];
+  source?: string;
 }
 
-export function FundInsights({ insights }: Props) {
+export function FundInsights({ insights, source }: Props) {
   return (
     <ul className="flex flex-col gap-3">
       {insights.map((insight) => (
-        <InsightCard key={insight.id} insight={insight} />
+        <InsightCard key={insight.id} insight={insight} source={source} />
       ))}
     </ul>
   );
 }
 
-function InsightCard({ insight }: { insight: FundInsight }) {
+function InsightCard({ insight, source }: { insight: FundInsight; source?: string }) {
   const Icon = toneIcon[insight.tone];
   const color = toneColor[insight.tone];
   const border = toneBorder[insight.tone];
@@ -55,7 +57,10 @@ function InsightCard({ insight }: { insight: FundInsight }) {
         <Icon className="size-3" />
       </div>
       <div className="flex-1 min-w-0">
-        <span className="text-sm font-medium text-foreground">{insight.title}</span>
+        <div className="flex items-start justify-between gap-2">
+          <span className="text-sm font-medium text-foreground">{insight.title}</span>
+          <ShareInsight title={insight.title} detail={insight.detail} source={source} />
+        </div>
         <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
           {insight.detail}
         </p>

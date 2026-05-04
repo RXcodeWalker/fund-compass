@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Search, GitCompare, Briefcase, Sparkles, ShieldCheck, TrendingUp, ChartBar as BarChart3, FileSpreadsheet, FileText, Clock, Eye, Zap, Target, Users, CircleCheck as CheckCircle2, X } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
+import { Onboarding } from "@/components/funds/Onboarding";
+import { InviteReferral } from "@/components/funds/InviteReferral";
 
 const Landing = () => {
   return (
     <div className="min-h-dvh bg-background">
       <SiteHeader />
+      <Onboarding />
 
       {/* ── Hero ──────────────────────────────────────────────────────── */}
       <section className="mx-auto max-w-[1120px] px-6 pb-20 pt-24">
@@ -332,7 +335,10 @@ const Landing = () => {
             </div>
           </div>
 
-          <div className="mt-10 border-t border-border pt-6 text-center">
+          <div className="mt-10 border-t border-border pt-6">
+            <div className="mb-6 max-w-sm">
+              <InviteReferral />
+            </div>
             <p className="text-[11px] text-muted-foreground">
               Built for clarity in private investing. Simulated data for demonstration purposes.
             </p>

@@ -20,6 +20,10 @@ import { PortfolioAnalysisSection } from "@/components/funds/PortfolioAnalysis";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { LockedFeature } from "@/components/funds/LockedFeature";
 import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
+import { SharePortfolio } from "@/components/funds/SharePortfolio";
+import { ReturnTriggers } from "@/components/funds/ReturnTriggers";
+import { InviteReferral } from "@/components/funds/InviteReferral";
+import { SavedComparisons } from "@/components/funds/SavedComparisons";
 import { funds } from "@/data/funds";
 import { usePortfolio, type Holding } from "@/hooks/usePortfolio";
 import { usePortfolioLiveData } from "@/hooks/useSimulation";
@@ -89,7 +93,22 @@ const Portfolio = () => {
             Track the funds you've saved with simulated performance. Saved
             locally — nothing leaves your device.
           </p>
+          {enriched.length > 0 && (
+            <div className="mt-2 flex items-center gap-3">
+              <SharePortfolio holdings={holdings} />
+            </div>
+          )}
         </header>
+
+        {/* Return triggers */}
+        {enriched.length > 0 && (
+          <div className="mb-6">
+            <ReturnTriggers />
+          </div>
+        )}
+
+        {/* Saved comparisons */}
+        <SavedComparisons />
 
         {enriched.length === 0 ? <EmptyState /> : (
           <>
@@ -195,6 +214,11 @@ const Portfolio = () => {
                   <PortfolioAnalysisSection analysis={portfolioAnalysis} />
                 </LockedFeature>
               )}
+            </section>
+
+            {/* Invite */}
+            <section className="mt-10 border-t border-border pt-10">
+              <InviteReferral />
             </section>
           </>
         )}

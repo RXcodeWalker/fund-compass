@@ -42,6 +42,20 @@ import {
   type DecisionMode,
   type AllocationPlan,
 } from "@/lib/allocate";
+import {
+  benchmarkFund,
+  recommendationConfidence,
+  recommendationWhy,
+  allocationConfidence,
+  ASSUMPTIONS,
+} from "@/lib/authority";
+import {
+  WhyPanel,
+  BenchmarkBadges,
+  ConfidenceBadge,
+  AssumptionsNote,
+  EducationalTerm,
+} from "@/components/funds/AuthorityPanels";
 import { fmtUSD, fmtPct } from "@/lib/portfolio";
 import { toast } from "sonner";
 import type { RiskLevel } from "@/data/funds";

@@ -42,6 +42,20 @@ import {
   type DecisionMode,
   type AllocationPlan,
 } from "@/lib/allocate";
+import {
+  benchmarkFund,
+  recommendationConfidence,
+  recommendationWhy,
+  allocationConfidence,
+  ASSUMPTIONS,
+} from "@/lib/authority";
+import {
+  WhyPanel,
+  BenchmarkBadges,
+  ConfidenceBadge,
+  AssumptionsNote,
+  EducationalTerm,
+} from "@/components/funds/AuthorityPanels";
 import { fmtUSD, fmtPct } from "@/lib/portfolio";
 import { toast } from "sonner";
 import type { RiskLevel } from "@/data/funds";
@@ -343,6 +357,7 @@ function ResultsPanel({
       {results.map((r, i) => (
         <RecommendationCard key={r.fund.id} rec={r} prefs={prefs} rank={i + 1} />
       ))}
+      <AssumptionsNote assumptions={ASSUMPTIONS.recommendation} title="What this analysis assumes" />
     </div>
   );
 }
@@ -423,6 +438,20 @@ function RecommendationCard({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Authority layer: why + benchmarks + confidence */}
+      <div className="mt-5 flex flex-col gap-3">
+        <WhyPanel why={recommendationWhy(rec, prefs)} />
+        <div>
+          <span className="label-eyebrow">
+            Benchmark vs <EducationalTerm termKey="consistency">peer category</EducationalTerm>
+          </span>
+          <div className="mt-2">
+            <BenchmarkBadges benchmarks={benchmarkFund(fund)} />
+          </div>
+        </div>
+        <ConfidenceBadge assessment={recommendationConfidence(rec, prefs)} showFactors />
       </div>
 
       {/* Footer row */}
@@ -652,6 +681,15 @@ function AllocationPlanPanel({
           ))}
         </div>
       )}
+
+      <div className="mt-6 flex flex-col gap-3">
+        <ConfidenceBadge
+          assessment={allocationConfidence(allocation)}
+          showFactors
+          label="Allocation confidence"
+        />
+        <AssumptionsNote assumptions={ASSUMPTIONS.allocation} title="Allocation assumptions" />
+      </div>
 
       {/* Action layer */}
       <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-5">

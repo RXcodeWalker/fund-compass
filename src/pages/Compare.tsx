@@ -11,6 +11,8 @@ import { useCompare } from "@/hooks/useCompare";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGrowth } from "@/hooks/useGrowth";
 import { generateComparisonInsights } from "@/lib/insights";
+import { benchmarkFund, ASSUMPTIONS } from "@/lib/authority";
+import { BenchmarkBadges, AssumptionsNote } from "@/components/funds/AuthorityPanels";
 import { toast } from "sonner";
 
 type Row = {
@@ -24,6 +26,11 @@ type Row = {
 const rows: Row[] = [
   { label: "Fund Type", get: (f) => f.type },
   { label: "Strategy", get: (f) => f.strategy },
+  {
+    label: "Benchmarks",
+    get: () => "",
+    render: (f) => <BenchmarkBadges benchmarks={benchmarkFund(f)} compact />,
+  },
   {
     label: "Expected Return",
     get: (f) => (f.returnMin + f.returnMax) / 2,
@@ -137,6 +144,9 @@ const Compare = () => {
               </div>
             )}
             <ComparisonTable items={items} onRemove={isShared ? () => {} : remove} isShared={isShared} showInsights={showComparisonInsights} />
+            <div className="mt-6">
+              <AssumptionsNote assumptions={ASSUMPTIONS.benchmark} title="How benchmarks and highlights are calculated" />
+            </div>
             {items.length > 1 && (
               <QuickRating action="comparison" label="Was this comparison useful?" className="mt-6" />
             )}

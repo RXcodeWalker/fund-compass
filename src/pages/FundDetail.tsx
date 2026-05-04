@@ -37,6 +37,12 @@ import { generateTimeline } from "@/data/timelines";
 import { FundInsights } from "@/components/funds/FundInsights";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { generateFundInsights, generateFundAlerts } from "@/lib/insights";
+import { benchmarkFund, ASSUMPTIONS } from "@/lib/authority";
+import {
+  BenchmarkBadges,
+  AssumptionsNote,
+  EducationalTerm,
+} from "@/components/funds/AuthorityPanels";
 import {
   dailyChange,
   weeklyChange,
@@ -69,6 +75,7 @@ const FundDetail = () => {
 
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
+  const { maxCompare } = useCompare();
   const manager = getManagerForFund(fund);
   const trust = manager ? computeTrustScore(manager) : 0;
   const flags = manager ? riskFlags(manager, fund) : [];
@@ -81,6 +88,7 @@ const FundDetail = () => {
   const timeline = useMemo(() => generateTimeline(fund), [fund]);
   const fundInsights = useMemo(() => generateFundInsights(fund), [fund]);
   const fundAlerts = useMemo(() => generateFundAlerts(fund), [fund]);
+  const benchmarks = useMemo(() => benchmarkFund(fund), [fund]);
 
   const metrics = [
     { label: "Current NAV", value: nav.toFixed(2), live: true },
@@ -300,7 +308,15 @@ const FundDetail = () => {
                   ].join(" ")}
                 >
                   <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {m.label}
+                    {m.label === "Risk Level" ? (
+                      <EducationalTerm termKey={`${fund.risk.toLowerCase()} risk`}>{m.label}</EducationalTerm>
+                    ) : m.label === "AUM" ? (
+                      <EducationalTerm termKey="aum">{m.label}</EducationalTerm>
+                    ) : m.label === "Current NAV" ? (
+                      <EducationalTerm termKey="nav">{m.label}</EducationalTerm>
+                    ) : (
+                      m.label
+                    )}
                     {m.live && (
                       <span className="size-1.5 rounded-full bg-risk-low animate-pulse" />
                     )}
@@ -320,7 +336,18 @@ const FundDetail = () => {
 
         {/* Key Insights */}
         <section className="mt-14 border-t border-border pt-10">
-          <h2 className="label-eyebrow mb-4">Key Insights</h2>
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="label-eyebrow">Benchmarks vs peer category</h2>
+            <span className="font-mono text-[11px] text-muted-foreground">
+              Compared against {fund.type} funds in this catalog
+            </span>
+          </div>
+          <BenchmarkBadges benchmarks={benchmarks} />
+          <div className="mt-4">
+            <AssumptionsNote assumptions={ASSUMPTIONS.benchmark} title="How benchmarks are calculated" />
+          </div>
+
+          <h2 className="label-eyebrow mb-4 mt-10">Key Insights</h2>
           {canAccess("fullInsights") ? (
             <FundInsights insights={fundInsights} source={fund.name} />
           ) : (

@@ -39,6 +39,12 @@ import {
   summarizePortfolio,
 } from "@/lib/portfolio";
 import { analyzePortfolio, generatePortfolioAlerts } from "@/lib/insights";
+import { portfolioConfidence, ASSUMPTIONS } from "@/lib/authority";
+import {
+  ConfidenceBadge,
+  AssumptionsNote,
+  EducationalTerm,
+} from "@/components/funds/AuthorityPanels";
 import {
   dailyChange,
   weeklyChange,
@@ -216,7 +222,12 @@ const Portfolio = () => {
 
             {/* Portfolio Analysis */}
             <section className="mt-10 border-t border-border pt-10">
-              <h2 className="label-eyebrow mb-6">Portfolio Analysis</h2>
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="label-eyebrow">
+                  Portfolio Analysis · <EducationalTerm termKey="diversification">diversification</EducationalTerm>
+                </h2>
+                <ConfidenceBadge assessment={portfolioConfidence(holdings)} showFactors label="Analysis confidence" />
+              </div>
               {canAccess("portfolioAnalysis") ? (
                 <PortfolioAnalysisSection analysis={portfolioAnalysis} />
               ) : (
@@ -224,6 +235,9 @@ const Portfolio = () => {
                   <PortfolioAnalysisSection analysis={portfolioAnalysis} />
                 </LockedFeature>
               )}
+              <div className="mt-5">
+                <AssumptionsNote assumptions={ASSUMPTIONS.portfolio} title="What this analysis assumes" />
+              </div>
             </section>
 
             {/* Invite */}
@@ -351,7 +365,7 @@ function HoldingCard({
   onRemove: () => void;
 }) {
   const positive = sim.gain >= 0;
-  const { isSelected, toggle, isFull } = useCompare();
+  const { isSelected, toggle, isFull, maxCompare } = useCompare();
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
 

@@ -28,6 +28,8 @@ import {
   type ScenarioComparison,
 } from "@/lib/scenarios";
 import { fmtUSD, fmtPct } from "@/lib/portfolio";
+import { ASSUMPTIONS } from "@/lib/authority";
+import { AssumptionsNote } from "@/components/funds/AuthorityPanels";
 import { toast } from "sonner";
 
 const scenarioIcons: Record<string, React.ElementType> = {

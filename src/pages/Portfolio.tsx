@@ -222,7 +222,12 @@ const Portfolio = () => {
 
             {/* Portfolio Analysis */}
             <section className="mt-10 border-t border-border pt-10">
-              <h2 className="label-eyebrow mb-6">Portfolio Analysis</h2>
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="label-eyebrow">
+                  Portfolio Analysis · <EducationalTerm termKey="diversification">diversification</EducationalTerm>
+                </h2>
+                <ConfidenceBadge assessment={portfolioConfidence(holdings)} showFactors label="Analysis confidence" />
+              </div>
               {canAccess("portfolioAnalysis") ? (
                 <PortfolioAnalysisSection analysis={portfolioAnalysis} />
               ) : (
@@ -230,6 +235,9 @@ const Portfolio = () => {
                   <PortfolioAnalysisSection analysis={portfolioAnalysis} />
                 </LockedFeature>
               )}
+              <div className="mt-5">
+                <AssumptionsNote assumptions={ASSUMPTIONS.portfolio} title="What this analysis assumes" />
+              </div>
             </section>
 
             {/* Invite */}

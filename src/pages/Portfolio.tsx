@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ArrowRight, Briefcase, Sparkles, Trash2, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowRight, Briefcase, Sparkles, Trash2, TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { CompareBar } from "@/components/funds/CompareBar";
 import { LiveIndicator } from "@/components/funds/LiveIndicator";
@@ -99,6 +99,13 @@ const Portfolio = () => {
           {enriched.length > 0 && (
             <div className="mt-2 flex items-center gap-3">
               <SharePortfolio holdings={holdings} />
+              <Link
+                to="/scenarios"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-2 text-xs font-medium text-foreground transition-colors hover:border-foreground"
+              >
+                <Zap className="size-3.5" />
+                Run Scenarios
+              </Link>
             </div>
           )}
         </header>

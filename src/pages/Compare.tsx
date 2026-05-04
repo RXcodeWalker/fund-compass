@@ -27,6 +27,11 @@ const rows: Row[] = [
   { label: "Fund Type", get: (f) => f.type },
   { label: "Strategy", get: (f) => f.strategy },
   {
+    label: "Benchmarks",
+    get: () => "",
+    render: (f) => <BenchmarkBadges benchmarks={benchmarkFund(f)} compact />,
+  },
+  {
     label: "Expected Return",
     get: (f) => (f.returnMin + f.returnMax) / 2,
     render: (f) => (

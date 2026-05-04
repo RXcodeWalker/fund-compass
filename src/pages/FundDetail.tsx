@@ -308,7 +308,15 @@ const FundDetail = () => {
                   ].join(" ")}
                 >
                   <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {m.label}
+                    {m.label === "Risk Level" ? (
+                      <EducationalTerm termKey={`${fund.risk.toLowerCase()} risk`}>{m.label}</EducationalTerm>
+                    ) : m.label === "AUM" ? (
+                      <EducationalTerm termKey="aum">{m.label}</EducationalTerm>
+                    ) : m.label === "Current NAV" ? (
+                      <EducationalTerm termKey="nav">{m.label}</EducationalTerm>
+                    ) : (
+                      m.label
+                    )}
                     {m.live && (
                       <span className="size-1.5 rounded-full bg-risk-low animate-pulse" />
                     )}

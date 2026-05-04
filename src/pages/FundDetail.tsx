@@ -37,6 +37,12 @@ import { generateTimeline } from "@/data/timelines";
 import { FundInsights } from "@/components/funds/FundInsights";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { generateFundInsights, generateFundAlerts } from "@/lib/insights";
+import { benchmarkFund, ASSUMPTIONS } from "@/lib/authority";
+import {
+  BenchmarkBadges,
+  AssumptionsNote,
+  EducationalTerm,
+} from "@/components/funds/AuthorityPanels";
 import {
   dailyChange,
   weeklyChange,
@@ -82,6 +88,7 @@ const FundDetail = () => {
   const timeline = useMemo(() => generateTimeline(fund), [fund]);
   const fundInsights = useMemo(() => generateFundInsights(fund), [fund]);
   const fundAlerts = useMemo(() => generateFundAlerts(fund), [fund]);
+  const benchmarks = useMemo(() => benchmarkFund(fund), [fund]);
 
   const metrics = [
     { label: "Current NAV", value: nav.toFixed(2), live: true },

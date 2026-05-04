@@ -439,6 +439,20 @@ function RecommendationCard({
         ))}
       </div>
 
+      {/* Authority layer: why + benchmarks + confidence */}
+      <div className="mt-5 flex flex-col gap-3">
+        <WhyPanel why={recommendationWhy(rec, prefs)} />
+        <div>
+          <span className="label-eyebrow">
+            Benchmark vs <EducationalTerm termKey="consistency">peer category</EducationalTerm>
+          </span>
+          <div className="mt-2">
+            <BenchmarkBadges benchmarks={benchmarkFund(fund)} />
+          </div>
+        </div>
+        <ConfidenceBadge assessment={recommendationConfidence(rec, prefs)} showFactors />
+      </div>
+
       {/* Footer row */}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
         <div className="flex flex-wrap items-center gap-5 text-xs">

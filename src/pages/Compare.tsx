@@ -144,6 +144,9 @@ const Compare = () => {
               </div>
             )}
             <ComparisonTable items={items} onRemove={isShared ? () => {} : remove} isShared={isShared} showInsights={showComparisonInsights} />
+            <div className="mt-6">
+              <AssumptionsNote assumptions={ASSUMPTIONS.benchmark} title="How benchmarks and highlights are calculated" />
+            </div>
             {items.length > 1 && (
               <QuickRating action="comparison" label="Was this comparison useful?" className="mt-6" />
             )}

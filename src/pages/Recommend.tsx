@@ -357,6 +357,7 @@ function ResultsPanel({
       {results.map((r, i) => (
         <RecommendationCard key={r.fund.id} rec={r} prefs={prefs} rank={i + 1} />
       ))}
+      <AssumptionsNote assumptions={ASSUMPTIONS.recommendation} title="What this analysis assumes" />
     </div>
   );
 }

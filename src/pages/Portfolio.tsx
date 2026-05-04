@@ -39,6 +39,12 @@ import {
   summarizePortfolio,
 } from "@/lib/portfolio";
 import { analyzePortfolio, generatePortfolioAlerts } from "@/lib/insights";
+import { portfolioConfidence, ASSUMPTIONS } from "@/lib/authority";
+import {
+  ConfidenceBadge,
+  AssumptionsNote,
+  EducationalTerm,
+} from "@/components/funds/AuthorityPanels";
 import {
   dailyChange,
   weeklyChange,

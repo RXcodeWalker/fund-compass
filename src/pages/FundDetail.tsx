@@ -328,7 +328,18 @@ const FundDetail = () => {
 
         {/* Key Insights */}
         <section className="mt-14 border-t border-border pt-10">
-          <h2 className="label-eyebrow mb-4">Key Insights</h2>
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="label-eyebrow">Benchmarks vs peer category</h2>
+            <span className="font-mono text-[11px] text-muted-foreground">
+              Compared against {fund.type} funds in this catalog
+            </span>
+          </div>
+          <BenchmarkBadges benchmarks={benchmarks} />
+          <div className="mt-4">
+            <AssumptionsNote assumptions={ASSUMPTIONS.benchmark} title="How benchmarks are calculated" />
+          </div>
+
+          <h2 className="label-eyebrow mb-4 mt-10">Key Insights</h2>
           {canAccess("fullInsights") ? (
             <FundInsights insights={fundInsights} source={fund.name} />
           ) : (

@@ -1,11 +1,32 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, ArrowRight, Plus, Check } from "lucide-react";
+import {
+  Sparkles,
+  ArrowRight,
+  Plus,
+  Check,
+  Zap,
+  Target,
+  Shield,
+  BarChart3,
+  Briefcase,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
 import { SaveToPortfolio } from "@/components/funds/SaveToPortfolio";
 import { QuickRating } from "@/components/funds/QuickRating";
 import { useCompare } from "@/hooks/useCompare";
+import { usePortfolio } from "@/hooks/usePortfolio";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
 import { formatCurrency } from "@/data/funds";
 import {
   recommend,
@@ -14,15 +35,32 @@ import {
   type Horizon,
   type Goal,
 } from "@/lib/recommend";
+import {
+  generateAllocation,
+  modeLabels,
+  modeDescriptions,
+  type DecisionMode,
+  type AllocationPlan,
+} from "@/lib/allocate";
+import { fmtUSD, fmtPct } from "@/lib/portfolio";
+import { toast } from "sonner";
 import type { RiskLevel } from "@/data/funds";
 
 const RISKS: RiskLevel[] = ["Low", "Medium", "High"];
 const HORIZONS: { value: Horizon; label: string; sub: string }[] = [
-  { value: "Short", label: "Short", sub: "1–3 yrs" },
-  { value: "Medium", label: "Medium", sub: "3–7 yrs" },
+  { value: "Short", label: "Short", sub: "1-3 yrs" },
+  { value: "Medium", label: "Medium", sub: "3-7 yrs" },
   { value: "Long", label: "Long", sub: "7+ yrs" },
 ];
 const GOALS: Goal[] = ["Growth", "Income", "Balanced"];
+
+const MODES: { value: DecisionMode; icon: React.ElementType; label: string }[] = [
+  { value: "aggressive", icon: Target, label: "Aggressive" },
+  { value: "balanced", icon: BarChart3, label: "Balanced" },
+  { value: "conservative", icon: Shield, label: "Conservative" },
+];
+
+const PIE_COLORS = ["hsl(var(--foreground))", "hsl(var(--risk-medium))", "hsl(var(--muted-foreground))"];
 
 const Recommend = () => {
   const [prefs, setPrefs] = useState<Preferences>({
@@ -32,10 +70,19 @@ const Recommend = () => {
     amount: 250000,
   });
   const [submitted, setSubmitted] = useState<Preferences | null>(null);
+  const [showAllocation, setShowAllocation] = useState(false);
+  const [decisionMode, setDecisionMode] = useState<DecisionMode>("balanced");
+  const { canAccess } = useSubscription();
+  const canTrack = canAccess("portfolioTracking");
 
   const results = useMemo(
     () => (submitted ? recommend(submitted, 3) : []),
     [submitted]
+  );
+
+  const allocation = useMemo(
+    () => (showAllocation && results.length > 0 ? generateAllocation(results, submitted!, decisionMode) : null),
+    [showAllocation, results, submitted, decisionMode]
   );
 
   return (
@@ -60,19 +107,48 @@ const Recommend = () => {
           <PreferencesPanel
             prefs={prefs}
             onChange={setPrefs}
-            onSubmit={() => setSubmitted({ ...prefs })}
+            onSubmit={() => {
+              setSubmitted({ ...prefs });
+              setShowAllocation(false);
+            }}
           />
 
-          <ResultsPanel results={results} prefs={submitted} />
+          <div className="flex flex-col gap-6">
+            <ResultsPanel results={results} prefs={submitted} />
 
-          {results.length > 0 && (
-            <QuickRating action="recommendation" label="Were these recommendations useful?" className="mt-6" />
-          )}
+            {/* Generate Allocation button */}
+            {results.length > 0 && !showAllocation && (
+              <button
+                type="button"
+                onClick={() => setShowAllocation(true)}
+                className="machined-edge inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-foreground"
+              >
+                <Zap className="size-4" />
+                Generate Allocation Plan
+              </button>
+            )}
+
+            {/* Allocation Plan */}
+            {allocation && (
+              <AllocationPlanPanel
+                allocation={allocation}
+                decisionMode={decisionMode}
+                onModeChange={(m) => setDecisionMode(m)}
+                canTrack={canTrack}
+              />
+            )}
+
+            {results.length > 0 && (
+              <QuickRating action="recommendation" label="Were these recommendations useful?" className="mt-2" />
+            )}
+          </div>
         </div>
       </main>
     </div>
   );
 };
+
+// ─── Preferences Panel ───────────────────────────────────────────────────────
 
 function PreferencesPanel({
   prefs,
@@ -231,6 +307,8 @@ function SegGroup<T extends string>({
   );
 }
 
+// ─── Results Panel ───────────────────────────────────────────────────────────
+
 function ResultsPanel({
   results,
   prefs,
@@ -350,7 +428,7 @@ function RecommendationCard({
       {/* Footer row */}
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
         <div className="flex flex-wrap items-center gap-5 text-xs">
-          <Stat label="Return" value={`${fund.returnMin}–${fund.returnMax}%`} />
+          <Stat label="Return" value={`${fund.returnMin}-${fund.returnMax}%`} />
           <Stat label="Duration" value={`${fund.durationYears}y`} />
           <Stat label="Minimum" value={formatCurrency(fund.minInvestment)} />
           <div className="flex items-center gap-2">
@@ -398,6 +476,211 @@ function Stat({ label, value }: { label: string; value: string }) {
         {label}
       </span>
       <span className="font-mono text-xs text-foreground">{value}</span>
+    </div>
+  );
+}
+
+// ─── Allocation Plan Panel ───────────────────────────────────────────────────
+
+function AllocationPlanPanel({
+  allocation,
+  decisionMode,
+  onModeChange,
+  canTrack,
+}: {
+  allocation: AllocationPlan;
+  decisionMode: DecisionMode;
+  onModeChange: (m: DecisionMode) => void;
+  canTrack: boolean;
+}) {
+  const { add } = usePortfolio();
+
+  const handleAddToPortfolio = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    for (const slot of allocation.slots) {
+      add({ fundId: slot.fundId, amount: slot.amount, startDate: today });
+    }
+    toast.success("Allocation added to portfolio", {
+      description: `${allocation.slots.length} funds totaling ${fmtUSD(allocation.totalAmount)}`,
+    });
+  };
+
+  const pieData = allocation.slots.map((s) => ({
+    name: s.fundName.length > 20 ? s.fundName.slice(0, 18) + "..." : s.fundName,
+    value: s.pct,
+  }));
+
+  return (
+    <div className="machined-edge rounded-lg border border-border bg-surface p-6">
+      <div className="flex items-center justify-between border-b border-border pb-4">
+        <div>
+          <span className="label-eyebrow">Allocation Plan</span>
+          <h2 className="mt-1 text-lg font-medium tracking-tight text-foreground">
+            Capital Distribution
+          </h2>
+        </div>
+        <span className="font-mono text-sm text-muted-foreground">
+          {fmtUSD(allocation.totalAmount)}
+        </span>
+      </div>
+
+      {/* Decision mode selector */}
+      <div className="mt-5">
+        <span className="label-eyebrow">Decision Mode</span>
+        <div className="mt-2 grid grid-cols-3 gap-1.5">
+          {MODES.map((m) => {
+            const Icon = m.icon;
+            const active = decisionMode === m.value;
+            return (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => onModeChange(m.value)}
+                className={[
+                  "flex flex-col items-center gap-1.5 rounded-md border px-3 py-3 text-center transition-all",
+                  active
+                    ? "border-foreground bg-foreground/5"
+                    : "border-border bg-surface hover:border-foreground",
+                ].join(" ")}
+              >
+                <Icon className={`size-4 ${active ? "text-foreground" : "text-muted-foreground"}`} />
+                <span className={`text-xs font-semibold ${active ? "text-foreground" : "text-muted-foreground"}`}>
+                  {m.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
+          {modeDescriptions[decisionMode]}
+        </p>
+      </div>
+
+      {/* Pie chart + allocation table */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-[200px_1fr]">
+        <div className="flex items-center justify-center">
+          <div className="h-48 w-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={48}
+                  outerRadius={72}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {pieData.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--surface))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    fontSize: 11,
+                  }}
+                  formatter={(value: number) => `${value}%`}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {allocation.slots.map((slot, i) => (
+            <div
+              key={slot.fundId}
+              className="flex items-center gap-3 rounded-md border border-border px-4 py-3"
+            >
+              <div
+                className="size-3 shrink-0 rounded-sm"
+                style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-sm font-medium text-foreground">{slot.fundName}</span>
+                  <span className="ml-2 font-mono text-sm font-semibold text-foreground">
+                    {slot.pct}%
+                  </span>
+                </div>
+                <div className="mt-1 flex items-baseline justify-between">
+                  <span className="text-[11px] text-muted-foreground">{slot.fundType} · Score {slot.score}</span>
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {fmtUSD(slot.amount)}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-muted-foreground italic">
+                  {slot.reasoning}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Insights */}
+      {allocation.insights.length > 0 && (
+        <div className="mt-6 flex flex-col gap-2">
+          {allocation.insights.map((insight) => (
+            <div
+              key={insight.id}
+              className={[
+                "flex items-start gap-2.5 rounded-md border px-3 py-2.5",
+                insight.tone === "positive"
+                  ? "border-risk-low/30 bg-risk-low/5"
+                  : insight.tone === "caution"
+                    ? "border-risk-medium/30 bg-risk-medium/5"
+                    : "border-border bg-surface",
+              ].join(" ")}
+            >
+              {insight.tone === "caution" ? (
+                <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-risk-medium" />
+              ) : (
+                <BarChart3 className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+              )}
+              <div className="flex-1 min-w-0">
+                <span className="text-[12px] font-medium text-foreground">{insight.title}</span>
+                <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+                  {insight.detail}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Action layer */}
+      <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-5">
+        {canTrack && (
+          <button
+            type="button"
+            onClick={handleAddToPortfolio}
+            className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-4 py-2.5 text-xs font-semibold text-background transition-opacity hover:opacity-90"
+          >
+            <Briefcase className="size-3.5" />
+            Add allocation to portfolio
+          </button>
+        )}
+        <Link
+          to="/scenarios"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-4 py-2.5 text-xs font-medium text-foreground transition-colors hover:border-foreground"
+        >
+          <Zap className="size-3.5" />
+          Simulate this allocation
+        </Link>
+        {!canTrack && (
+          <Link
+            to="/pricing"
+            className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-4 py-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Upgrade to add to portfolio
+          </Link>
+        )}
+      </div>
     </div>
   );
 }

@@ -351,7 +351,7 @@ function HoldingCard({
   onRemove: () => void;
 }) {
   const positive = sim.gain >= 0;
-  const { isSelected, toggle, isFull } = useCompare();
+  const { isSelected, toggle, isFull, maxCompare } = useCompare();
   const checked = isSelected(fund.id);
   const disabled = !checked && isFull;
 

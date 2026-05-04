@@ -41,7 +41,7 @@ const Index = () => {
       if (showFavoritesOnly && !favorites.some((fav) => fav.fundId === f.id)) return false;
       return true;
     });
-  }, [filters]);
+  }, [filters, showFavoritesOnly, favorites]);
 
   // Collect notable alerts across visible funds
   const notableAlerts = useMemo(() => {

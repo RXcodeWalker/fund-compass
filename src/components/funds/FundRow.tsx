@@ -34,7 +34,7 @@ export function FundRow({ fund }: Props) {
         disabled={disabled}
         aria-pressed={checked}
         aria-label={`Compare ${fund.name}`}
-        title={disabled ? `Maximum ${MAX_COMPARE} funds` : "Toggle compare"}
+        title={disabled ? `Maximum ${maxCompare} funds` : "Toggle compare"}
         className={[
           "flex size-5 items-center justify-center rounded-sm border transition-all",
           checked

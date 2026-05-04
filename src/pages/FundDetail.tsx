@@ -142,7 +142,7 @@ const FundDetail = () => {
               type="button"
               onClick={() => toggle(fund.id)}
               disabled={disabled}
-              title={disabled ? `Maximum ${MAX_COMPARE} funds` : ""}
+              title={disabled ? `Maximum ${maxCompare} funds` : ""}
               className={[
                 "machined-edge inline-flex items-center gap-2 rounded-md px-4 py-2 text-xs font-medium transition-all",
                 checked

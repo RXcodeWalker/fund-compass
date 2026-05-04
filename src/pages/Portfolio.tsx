@@ -430,7 +430,7 @@ function HoldingCard({
           type="button"
           onClick={() => toggle(fund.id)}
           disabled={disabled}
-          title={disabled ? `Maximum ${MAX_COMPARE} funds` : undefined}
+          title={disabled ? `Maximum ${maxCompare} funds` : undefined}
           className={[
             "rounded-md border px-2.5 py-1 text-[11px] font-medium transition-colors",
             checked

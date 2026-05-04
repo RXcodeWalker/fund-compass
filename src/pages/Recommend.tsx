@@ -682,6 +682,15 @@ function AllocationPlanPanel({
         </div>
       )}
 
+      <div className="mt-6 flex flex-col gap-3">
+        <ConfidenceBadge
+          assessment={allocationConfidence(allocation)}
+          showFactors
+          label="Allocation confidence"
+        />
+        <AssumptionsNote assumptions={ASSUMPTIONS.allocation} title="Allocation assumptions" />
+      </div>
+
       {/* Action layer */}
       <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-5">
         {canTrack && (

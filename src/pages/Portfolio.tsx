@@ -16,6 +16,7 @@ import { SiteHeader } from "@/components/funds/SiteHeader";
 import { CompareBar } from "@/components/funds/CompareBar";
 import { LiveIndicator } from "@/components/funds/LiveIndicator";
 import { LastUpdated } from "@/components/funds/LastUpdated";
+import { QuickRating } from "@/components/funds/QuickRating";
 import { PortfolioAnalysisSection } from "@/components/funds/PortfolioAnalysis";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { LockedFeature } from "@/components/funds/LockedFeature";
@@ -24,6 +25,8 @@ import { SharePortfolio } from "@/components/funds/SharePortfolio";
 import { ReturnTriggers } from "@/components/funds/ReturnTriggers";
 import { InviteReferral } from "@/components/funds/InviteReferral";
 import { SavedComparisons } from "@/components/funds/SavedComparisons";
+import { FeatureRequests } from "@/components/funds/FeatureRequests";
+import { EarlyAccess } from "@/components/funds/EarlyAccess";
 import { funds } from "@/data/funds";
 import { usePortfolio, type Holding } from "@/hooks/usePortfolio";
 import { usePortfolioLiveData } from "@/hooks/useSimulation";
@@ -220,6 +223,17 @@ const Portfolio = () => {
             <section className="mt-10 border-t border-border pt-10">
               <InviteReferral />
             </section>
+
+            {/* Feature requests & early access */}
+            <section className="mt-10 border-t border-border pt-10">
+              <div className="grid gap-10 lg:grid-cols-2">
+                <FeatureRequests />
+                <EarlyAccess />
+              </div>
+            </section>
+
+            {/* Rating */}
+            <QuickRating action="portfolio" label="Is the portfolio view useful?" className="mt-6" />
           </>
         )}
       </main>

@@ -9,6 +9,7 @@ const nav = [
   { to: "/compare", label: "Compare" },
   { to: "/portfolio", label: "Portfolio" },
   { to: "/pricing", label: "Pricing" },
+  { to: "/analytics", label: "Analytics" },
 ];
 
 export function SiteHeader() {

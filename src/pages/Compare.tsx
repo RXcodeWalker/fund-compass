@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, X, Share2, Bookmark, BookmarkCheck } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
+import { QuickRating } from "@/components/funds/QuickRating";
 import { ComparisonInsights as ComparisonInsightsBar } from "@/components/funds/ComparisonInsights";
 import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
 import { funds, formatCurrency, type Fund } from "@/data/funds";
@@ -136,6 +137,9 @@ const Compare = () => {
               </div>
             )}
             <ComparisonTable items={items} onRemove={isShared ? () => {} : remove} isShared={isShared} showInsights={showComparisonInsights} />
+            {items.length > 1 && (
+              <QuickRating action="comparison" label="Was this comparison useful?" className="mt-6" />
+            )}
           </>
         )}
       </main>

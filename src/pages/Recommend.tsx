@@ -4,6 +4,7 @@ import { Sparkles, ArrowRight, Plus, Check } from "lucide-react";
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { RiskMeter } from "@/components/funds/RiskMeter";
 import { SaveToPortfolio } from "@/components/funds/SaveToPortfolio";
+import { QuickRating } from "@/components/funds/QuickRating";
 import { useCompare } from "@/hooks/useCompare";
 import { formatCurrency } from "@/data/funds";
 import {
@@ -63,6 +64,10 @@ const Recommend = () => {
           />
 
           <ResultsPanel results={results} prefs={submitted} />
+
+          {results.length > 0 && (
+            <QuickRating action="recommendation" label="Were these recommendations useful?" className="mt-6" />
+          )}
         </div>
       </main>
     </div>

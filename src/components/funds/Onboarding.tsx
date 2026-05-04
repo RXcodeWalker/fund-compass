@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, GitCompare, Briefcase, X, ArrowRight } from "lucide-react";
+import { Search, GitCompare, Briefcase, X, ArrowRight, CircleCheck as CheckCircle2 } from "lucide-react";
 import { useGrowth } from "@/hooks/useGrowth";
+import { useFeedback, type UserIntent } from "@/hooks/useFeedback";
 
 const steps = [
   {
@@ -24,15 +25,33 @@ const steps = [
   },
 ];
 
+const intentOptions: { value: UserIntent; label: string; icon: React.ElementType }[] = [
+  { value: "compare", label: "Compare funds", icon: GitCompare },
+  { value: "learn", label: "Learn about private investments", icon: Search },
+  { value: "track", label: "Track investments", icon: Briefcase },
+];
+
 export function Onboarding() {
   const { seenOnboarding, markOnboardingSeen } = useGrowth();
+  const { userIntent, setUserIntent } = useFeedback();
   const [open, setOpen] = useState(!seenOnboarding);
+  const [step, setStep] = useState<"intent" | "overview">(
+    userIntent ? "overview" : "intent"
+  );
+  const [selectedIntent, setSelectedIntent] = useState<UserIntent>(userIntent);
 
   if (!open || seenOnboarding) return null;
 
   const handleClose = () => {
     setOpen(false);
     markOnboardingSeen();
+  };
+
+  const handleIntentSubmit = () => {
+    if (selectedIntent) {
+      setUserIntent(selectedIntent);
+    }
+    setStep("overview");
   };
 
   return (
@@ -46,52 +65,110 @@ export function Onboarding() {
           <X className="size-4" />
         </button>
 
-        <span className="label-eyebrow">Welcome to Aethelgard</span>
-        <h2 className="mt-2 text-xl font-medium tracking-tight text-foreground">
-          Get started in 3 steps
-        </h2>
-        <p className="mt-1 text-[12px] text-muted-foreground">
-          A quick overview of what you can do here.
-        </p>
+        {step === "intent" ? (
+          <>
+            <span className="label-eyebrow">Welcome to Aethelgard</span>
+            <h2 className="mt-2 text-xl font-medium tracking-tight text-foreground">
+              What are you trying to do?
+            </h2>
+            <p className="mt-1 text-[12px] text-muted-foreground">
+              This helps us tailor your experience.
+            </p>
 
-        <ol className="mt-6 space-y-4">
-          {steps.map((step, i) => {
-            const Icon = step.icon;
-            return (
-              <li key={step.title} className="flex items-start gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-background font-mono text-xs font-semibold text-foreground">
-                  {i + 1}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Icon className="size-4 text-foreground" />
-                    <span className="text-sm font-semibold text-foreground">{step.title}</span>
-                  </div>
-                  <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
-                    {step.description}
-                  </p>
-                </div>
-              </li>
-            );
-          })}
-        </ol>
+            <div className="mt-6 space-y-2">
+              {intentOptions.map((opt) => {
+                const Icon = opt.icon;
+                const active = selectedIntent === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedIntent(opt.value)}
+                    className={[
+                      "flex w-full items-center gap-3 rounded-md border px-4 py-3 text-left transition-colors",
+                      active
+                        ? "border-foreground bg-foreground/5"
+                        : "border-border bg-surface hover:border-foreground",
+                    ].join(" ")}
+                  >
+                    <Icon className={`size-4 ${active ? "text-foreground" : "text-muted-foreground"}`} />
+                    <span className={`text-sm font-medium ${active ? "text-foreground" : "text-muted-foreground"}`}>
+                      {opt.label}
+                    </span>
+                    {active && <CheckCircle2 className="ml-auto size-4 text-foreground" />}
+                  </button>
+                );
+              })}
+            </div>
 
-        <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
-          <button
-            type="button"
-            onClick={handleClose}
-            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Skip for now
-          </button>
-          <Link
-            to="/funds"
-            onClick={handleClose}
-            className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-4 py-2 text-xs font-semibold text-background transition-opacity hover:opacity-90"
-          >
-            Get started <ArrowRight className="size-3" />
-          </Link>
-        </div>
+            <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Skip for now
+              </button>
+              <button
+                type="button"
+                onClick={handleIntentSubmit}
+                disabled={!selectedIntent}
+                className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-4 py-2 text-xs font-semibold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Continue <ArrowRight className="size-3" />
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="label-eyebrow">Quick Overview</span>
+            <h2 className="mt-2 text-xl font-medium tracking-tight text-foreground">
+              Get started in 3 steps
+            </h2>
+            <p className="mt-1 text-[12px] text-muted-foreground">
+              Here's what you can do on Aethelgard.
+            </p>
+
+            <ol className="mt-6 space-y-4">
+              {steps.map((s, i) => {
+                const Icon = s.icon;
+                return (
+                  <li key={s.title} className="flex items-start gap-3">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-background font-mono text-xs font-semibold text-foreground">
+                      {i + 1}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Icon className="size-4 text-foreground" />
+                        <span className="text-sm font-semibold text-foreground">{s.title}</span>
+                      </div>
+                      <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
+                        {s.description}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+
+            <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Skip for now
+              </button>
+              <Link
+                to="/funds"
+                onClick={handleClose}
+                className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-4 py-2 text-xs font-semibold text-background transition-opacity hover:opacity-90"
+              >
+                Get started <ArrowRight className="size-3" />
+              </Link>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

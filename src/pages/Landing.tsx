@@ -3,6 +3,8 @@ import { ArrowRight, Search, GitCompare, Briefcase, Sparkles, ShieldCheck, Trend
 import { SiteHeader } from "@/components/funds/SiteHeader";
 import { Onboarding } from "@/components/funds/Onboarding";
 import { InviteReferral } from "@/components/funds/InviteReferral";
+import { FeatureRequests } from "@/components/funds/FeatureRequests";
+import { EarlyAccess } from "@/components/funds/EarlyAccess";
 
 const Landing = () => {
   return (
@@ -289,6 +291,19 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* ── Feature Requests & Early Access ────────────────────────────── */}
+      <section className="border-t border-border">
+        <div className="mx-auto max-w-[1120px] px-6 py-20">
+          <div className="grid gap-10 lg:grid-cols-2">
+            <FeatureRequests />
+            <div className="flex flex-col gap-6">
+              <EarlyAccess />
+              <InviteReferral />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Footer ────────────────────────────────────────────────────── */}
       <footer className="border-t border-border bg-surface-muted/50">
         <div className="mx-auto max-w-[1120px] px-6 py-12">
@@ -336,9 +351,6 @@ const Landing = () => {
           </div>
 
           <div className="mt-10 border-t border-border pt-6">
-            <div className="mb-6 max-w-sm">
-              <InviteReferral />
-            </div>
             <p className="text-[11px] text-muted-foreground">
               Built for clarity in private investing. Simulated data for demonstration purposes.
             </p>

@@ -11,6 +11,8 @@ import { useCompare } from "@/hooks/useCompare";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGrowth } from "@/hooks/useGrowth";
 import { generateComparisonInsights } from "@/lib/insights";
+import { benchmarkFund, ASSUMPTIONS } from "@/lib/authority";
+import { BenchmarkBadges, AssumptionsNote } from "@/components/funds/AuthorityPanels";
 import { toast } from "sonner";
 
 type Row = {

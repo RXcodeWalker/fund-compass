@@ -602,6 +602,8 @@ function ScenarioResults({
           </div>
         </section>
       )}
+
+      <AssumptionsNote assumptions={ASSUMPTIONS.scenario} title="What this scenario assumes" />
     </div>
   );
 }

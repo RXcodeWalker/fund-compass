@@ -14,7 +14,7 @@ export function ShareInsight({ title, detail, source, className = "" }: Props) {
     detail,
     source ? `Source: ${source}` : "",
     "",
-    "Insight from Aethelgard Capital",
+    "Insight from ApexLedger",
   ].filter(Boolean).join("\n");
 
   const handleShare = async () => {

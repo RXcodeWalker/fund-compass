@@ -67,7 +67,7 @@ export function Onboarding() {
 
         {step === "intent" ? (
           <>
-            <span className="label-eyebrow">Welcome to Aethelgard</span>
+            <span className="label-eyebrow">Welcome to ApexLedger</span>
             <h2 className="mt-2 text-xl font-medium tracking-tight text-foreground">
               What are you trying to do?
             </h2>
@@ -126,7 +126,7 @@ export function Onboarding() {
               Get started in 3 steps
             </h2>
             <p className="mt-1 text-[12px] text-muted-foreground">
-              Here's what you can do on Aethelgard.
+              Here's what you can do on ApexLedger.
             </p>
 
             <ol className="mt-6 space-y-4">

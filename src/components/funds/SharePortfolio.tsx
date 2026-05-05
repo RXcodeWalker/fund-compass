@@ -20,19 +20,19 @@ export function SharePortfolio({ holdings }: Props) {
     .slice(0, 3);
 
   const shareText = [
-    `My Aethelgard Portfolio`,
+    `My ApexLedger Portfolio`,
     `Value: ${fmtUSD(summary.totalCurrent)} | Return: ${fmtPct(summary.returnPct)}`,
     `Holdings: ${holdings.length} funds`,
     ...topFunds.map((f) => f ? `  - ${f.name} (${fmtUSD(f.amount)})` : []),
     "",
-    "Build your own at aethelgard.capital",
+    "Build your own at apexledger.com",
   ].join("\n");
 
   const handleShare = async () => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: "My Aethelgard Portfolio",
+          title: "My ApexLedger Portfolio",
           text: shareText,
         });
       } else {

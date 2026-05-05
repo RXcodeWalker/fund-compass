@@ -26,7 +26,7 @@ export function SiteHeader() {
           <Link to="/" className="flex items-center gap-2">
             <div className="size-5 rounded-sm bg-primary" aria-hidden />
             <span className="text-sm font-semibold uppercase tracking-tight">
-              Aethelgard / Capital
+              ApexLedger
             </span>
           </Link>
           <div className="hidden h-4 w-px bg-border md:block" />

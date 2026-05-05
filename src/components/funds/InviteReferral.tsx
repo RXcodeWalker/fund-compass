@@ -29,7 +29,7 @@ export function InviteReferral() {
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-foreground">Invite a friend</h3>
           <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
-            Share Aethelgard with someone evaluating private investments.
+            Share ApexLedger with someone evaluating private investments.
           </p>
 
           {!isPro && (

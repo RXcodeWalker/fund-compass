@@ -73,7 +73,7 @@ export function FeedbackWidget() {
               <>
                 <h3 className="text-sm font-semibold text-foreground">Send feedback</h3>
                 <p className="mt-1 text-[12px] text-muted-foreground">
-                  Quick and anonymous. Help us make Aethelgard better.
+                  Quick and anonymous. Help us make ApexLedger better.
                 </p>
 
                 {/* Type selector */}

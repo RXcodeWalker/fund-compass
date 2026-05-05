@@ -20,7 +20,7 @@ const Landing = () => {
             Compare, analyze, and track private investments in one place.
           </h1>
           <p className="mt-6 max-w-lg text-pretty text-base leading-relaxed text-muted-foreground">
-            Stop juggling spreadsheets and scattered PDFs. Aethelgard gives you
+            Stop juggling spreadsheets and scattered PDFs. ApexLedger gives you
             structured fund data, intelligent insights, and portfolio tracking
             — designed for clarity, not complexity.
           </p>
@@ -115,7 +115,7 @@ const Landing = () => {
           </h2>
           <p className="mt-3 max-w-lg text-sm text-muted-foreground">
             Manual research means copying numbers into spreadsheets, guessing at
-            comparisons, and missing critical signals. Aethelgard replaces all of
+            comparisons, and missing critical signals. ApexLedger replaces all of
             that with purpose-built tools.
           </p>
 
@@ -312,7 +312,7 @@ const Landing = () => {
               <div className="flex items-center gap-2">
                 <div className="size-4 rounded-sm bg-primary" aria-hidden />
                 <span className="text-sm font-semibold uppercase tracking-tight">
-                  Aethelgard / Capital
+                  ApexLedger
                 </span>
               </div>
               <p className="mt-3 text-xs leading-relaxed text-muted-foreground">

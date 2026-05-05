@@ -37,6 +37,7 @@ import { generateTimeline } from "@/data/timelines";
 import { FundInsights } from "@/components/funds/FundInsights";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { generateFundInsights, generateFundAlerts } from "@/lib/insights";
+import { RegulatorySummary } from "@/components/funds/RegulatorySummary";
 import { benchmarkFund, ASSUMPTIONS } from "@/lib/authority";
 import {
   BenchmarkBadges,
@@ -430,6 +431,15 @@ const FundDetail = () => {
             </div>
           </section>
         )}
+
+        {/* Regulatory & Disclosure Summary */}
+        <section className="mt-14 border-t border-border pt-10">
+          <h2 className="label-eyebrow mb-4">Regulatory & Disclosure Summary</h2>
+          <p className="mb-6 max-w-lg text-sm text-muted-foreground">
+            Simplified regulatory signals and disclosure indicators. Not financial or legal advice.
+          </p>
+          <RegulatorySummary fund={fund} />
+        </section>
       </main>
 
       <CompareBar />

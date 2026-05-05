@@ -11,6 +11,7 @@ import { useCompare } from "@/hooks/useCompare";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useGrowth } from "@/hooks/useGrowth";
 import { generateComparisonInsights } from "@/lib/insights";
+import { RegulatoryConfidenceBadge, TransparencyBadge } from "@/components/funds/RegulatorySummary";
 import { benchmarkFund, ASSUMPTIONS } from "@/lib/authority";
 import { BenchmarkBadges, AssumptionsNote } from "@/components/funds/AuthorityPanels";
 import { toast } from "sonner";
@@ -62,6 +63,16 @@ const rows: Row[] = [
   { label: "AUM", get: (f) => f.aum },
   { label: "Inception", get: (f) => f.inception },
   { label: "Manager", get: (f) => f.manager },
+  {
+    label: "Transparency",
+    get: () => "",
+    render: (f) => <TransparencyBadge fund={f} />,
+  },
+  {
+    label: "Regulatory Confidence",
+    get: () => "",
+    render: (f) => <RegulatoryConfidenceBadge fund={f} />,
+  },
 ];
 
 const Compare = () => {

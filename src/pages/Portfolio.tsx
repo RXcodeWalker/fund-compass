@@ -18,6 +18,7 @@ import { LiveIndicator } from "@/components/funds/LiveIndicator";
 import { LastUpdated } from "@/components/funds/LastUpdated";
 import { QuickRating } from "@/components/funds/QuickRating";
 import { PortfolioAnalysisSection } from "@/components/funds/PortfolioAnalysis";
+import { PortfolioRegulatorySummary } from "@/components/funds/RegulatorySummary";
 import { SmartAlerts } from "@/components/funds/SmartAlert";
 import { LockedFeature } from "@/components/funds/LockedFeature";
 import { UpgradePrompt } from "@/components/funds/UpgradePrompt";
@@ -120,6 +121,13 @@ const Portfolio = () => {
         {enriched.length > 0 && (
           <div className="mb-6">
             <ReturnTriggers />
+          </div>
+        )}
+
+        {/* Regulatory overview */}
+        {enriched.length > 0 && (
+          <div className="mb-6">
+            <PortfolioRegulatorySummary fundIds={fundIds} />
           </div>
         )}
 
